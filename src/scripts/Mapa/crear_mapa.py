@@ -15,8 +15,8 @@ def crear_mapa(matriz, ventana, tipos_enemigos: list[str]):
             if matriz[x][y]=="X":
                 pared=Tile((y*c.TAMAÑO_PARED,x*c.TAMAÑO_PARED),True,"pacman_tp/assets/images/items/pared.png",True)
                 lista_entidades.append(pared)
-                #pared=pygame.Rect(y*c.TAMAÑO_PARED,x*c.TAMAÑO_PARED,c.TAMAÑO_PARED,c.TAMAÑO_PARED)
-                #pygame.draw.rect(ventana,c.AZUL,pared)
+                pared=pygame.Rect(y*c.TAMAÑO_PARED,x*c.TAMAÑO_PARED,c.TAMAÑO_PARED,c.TAMAÑO_PARED)
+                pygame.draw.rect(ventana,c.AZUL,pared)
             elif matriz[x][y]==".":
                 #pun_peq=Item(y*c.TAMAÑO_PARED+c.TAMAÑO_PARED//2,x*c.TAMAÑO_PARED+c.TAMAÑO_PARED//2,1,[punto_pequeño])
                 #grupo_items.add(pun_peq)

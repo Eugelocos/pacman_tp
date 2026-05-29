@@ -1,4 +1,5 @@
 from .crear_mapa import crear_mapa
+import constantes as c 
 
 class GridManager:
     """Clase que maneja los mapeos entre posiciones discretas y continuas
@@ -6,8 +7,8 @@ class GridManager:
     def __init__(self, matriz_mapa,cell_size=32.0, tipos_enemigos: list[str]=["Blinky", "Pinky", "Inky", "Clyde"]):
         """Inicializa el GridManager con una cuadrícula y un tamaño de celda."""
         self.grid=crear_mapa(matriz_mapa, None, tipos_enemigos)
-        self.width = len(self.grid[1])
-        self.height = len(self.grid)
+        self.width = c.MAPA_ANCHO
+        self.height = c.MAPA_ALTO
         self.cell_size = cell_size
 
     def check_position(self, pos):
@@ -21,7 +22,7 @@ class GridManager:
     
     def check_limits(self, pos):
         """Verifica si la posicion esta dentro de los limites del grid"""
-        x, y = self.world_to_grid(int(pos[0]), int(pos[1]))
+        x, y = self.world_to_grid((int(pos[0]), int(pos[1])))
         
         return 0 <= x < self.width and 0 <= y < self.height
     
@@ -53,4 +54,23 @@ class GridManager:
         snapped_x=round(x/self.cell_size)*self.cell_size
         snapped_y=round(y/self.cell_size)*self.cell_size
         return (snapped_x, snapped_y)
+    
+    def check_collision(self, pos, direccion: str, entities):
+        """
+         Detecta si hay una entidad en la celda hacia la que se está moviendo.
+    
+        Convierte la posición actual en píxeles a coordenadas de celda, calcula
+        la celda futura sumando el vector de dirección, y devuelve la entidad
+        que se encuentre en esa celda si existe.
+
+        """
+        
+        celda_actual=self.world_to_grid(pos)
+        celda_futura=((celda_actual[0]+c.DIRECCIONES[direccion][0]),(celda_actual[1]+c.DIRECCIONES[direccion][1]))
+        entidad=self.get_cell_by_position(self.grid_to_world(celda_futura),entities)     
+        return entidad 
+        
+        
+        
+        
 

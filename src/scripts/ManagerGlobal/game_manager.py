@@ -2,6 +2,8 @@
 import pygame
 from .game_scene import GameScene
 from .menu_scene import MenuScene
+from Mapa.map import matriz_mapa
+from Mapa.grid_manager import GridManager
 
 class GameManager():
     def __init__(self):
@@ -10,6 +12,8 @@ class GameManager():
         self.pantalla=pygame.display.set_mode((800,600))
         self.scenes={"menu": MenuScene(self), "game": GameScene(self), "game_over": GameScene(self)}
         self.current_scene="menu"
+        self.grid_manager = GridManager(matriz_mapa)
+        
 
     def add_entity(self, entity):
         self.entities.add(entity)
