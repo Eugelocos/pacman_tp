@@ -1,5 +1,5 @@
 from .crear_mapa import crear_mapa
-import constantes as c 
+import pacman_tp.src.constantes as c 
 
 class GridManager:
     """Clase que maneja los mapeos entre posiciones discretas y continuas

@@ -1,5 +1,5 @@
 import pygame
-import pacman_tp.src.scripts.constantes as c
+import pacman_tp.src.constantes as c
 from ...data_structures.character.enemy_data_type import Enemy 
 from ...data_structures.character.player_data_type import Player 
 from ...data_structures.map.tile_data_type import Tile

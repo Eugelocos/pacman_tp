@@ -1,13 +1,10 @@
-import sys
-import os
+import pygame
+import sys, os
 
-# Esto busca la carpeta del archivo main.py y le dice a Python que busque ahí dentro
 ruta_actual = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(ruta_actual)
-
-import pygame
-from scripts import constantes as c
-from scripts.funciones import *
+import constantes as c
+from scripts.funciones_aux import *
 from scripts.Mapa.map import *
 
 
@@ -22,9 +19,9 @@ pygame.display.set_caption("PACMAN")
 #controlar el framerate
 reloj=pygame.time.Clock()
 
-run=True
+corriendo=True
 
-while run:
+while corriendo:
     
     reloj.tick(c.FPS)
     ventana.fill(c.COLOR_BG)
@@ -35,7 +32,7 @@ while run:
     
     for evento in pygame.event.get():
         if evento.type == pygame.QUIT:
-            run=False
+            corriendo=False
             
     pygame.display.update()
     

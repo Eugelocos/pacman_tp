@@ -1,20 +1,31 @@
-from entity import Entity
+from src.data_structures.entity import Entity
 
 
-class Character(Entity):
 
-    def __init__(self,position, visibility, sprite, direction):
-        super().__init__(position, visibility, sprite)
+class Personaje(Entity):
+    DIRECTIONS={"arriba":(0,-1),"abajo":(0,1),"derecha":(1, 0),"izquierda":(-1,0)}
+    def __init__(self,position, visibility, direction, tile_size, sprite):
+        super().__init__(position, visibility,  tile_size, sprite)
+
         self.velocity=5
         self.direction=self.DIRECTIONS[direction]
-        self.DIRECTIONS={
-        "UP":(0,-1),
-        "DOWN":(0,1),
-        "RIGHT":(0,1),
-        "LEFT":(0,-1),   
-        }
-        self.nombre_ruta=sprite
-        self.ruta="pacman_tp/assets/images/"+self.nombre_ruta+"/"+self.nombre_ruta+"_1.png"
-    def changeDir(self, new_dir):
-        self.direction=new_dir
+
+        self.frames = [self.image]
+        self.frame_actual = 0
+        self.frame_timer = 0
+        self.frame_delay = 100
+
+
+    def change_dir(self, new_dir):
+        self.direction=self.DIRECTIONS[new_dir]
+        if hasattr(self, 'cambiar_sprite_por_direccion'):
+            self.cambiar_sprite_por_direccion()
+            self.frame_timer=0
+            self.frame_actual=0
+    def actualizar_animacion(self, delta_time):
+        self.frame_timer += delta_time
+        if self.frame_timer >= self.frame_delay:
+            self.frame_timer = 0
+            self.frame_actual = (self.frame_actual + 1) % len(self.frames)
+            self.image=self.frames[self.frame_actual]
 

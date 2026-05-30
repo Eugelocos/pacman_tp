@@ -1,5 +1,5 @@
-from funciones import nombres_carpetas,escalar_img,contar_elementos
-import constantes as c 
+from funciones_aux import nombres_carpetas,escalar_img,contar_elementos
+import pacman_tp.src.constantes as c 
 import pygame
 
 #cargar imagenes fantasmas

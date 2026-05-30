@@ -1,6 +1,9 @@
 import os
+import sys
 import pygame
-from scripts import constantes as c
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
+import constantes as c
 
 def nombres_carpetas(directorio):
     return os.listdir(directorio)
@@ -28,3 +31,8 @@ def dibujar_paredes(matriz, ventana):
             if matriz[x][y] == "X":
                 pared = pygame.Rect(y*c.TAMAÑO_PARED, x*c.TAMAÑO_PARED, c.TAMAÑO_PARED, c.TAMAÑO_PARED)
                 pygame.draw.rect(ventana, c.AZUL, pared)
+
+def cargar_con_transparencia(ruta):
+    img = pygame.image.load(ruta).convert()  
+    img.set_colorkey((0, 0, 0))             
+    return img.convert_alpha()              

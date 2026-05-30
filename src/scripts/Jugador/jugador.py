@@ -1,6 +1,6 @@
 import pygame
-from funciones import escalar_img
-import constantes as c   
+from funciones_aux import escalar_img
+import pacman_tp.src.constantes as c   
 
 #skin del pj
 animaciones=[]

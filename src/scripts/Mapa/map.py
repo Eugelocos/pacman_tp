@@ -1,9 +1,9 @@
 import pygame
-
+import os
 
 #abrir el mapa 
-
-with open("pacman_tp\src\scripts\Mapa\mapa.txt","r") as mapa:
+ruta_mapa = os.path.join(os.path.dirname(__file__), "mapa.txt")
+with open(ruta_mapa, "r") as mapa:
     matriz_mapa=[]
     caracteres_validos=["X",".","P","o"," ","G","-","T"]
     for linea in mapa:
