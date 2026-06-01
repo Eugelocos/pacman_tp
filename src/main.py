@@ -6,14 +6,10 @@ sys.path.append(ruta_actual)
 import constantes as c
 from scripts.funciones_aux import *
 from scripts.Mapa.map import *
-
+from scripts.ManagerGlobal.game_manager import GameManager
 
 
 pygame.init()
-
-#crear y mostrar la ventana
-ventana = pygame.display.set_mode((c.ANCHO_VENTANA,c.ALTO_VENTANA))
-pygame.display.set_caption("PACMAN")
 
 
 #controlar el framerate
@@ -21,20 +17,25 @@ reloj=pygame.time.Clock()
 
 corriendo=True
 
+game_manager = GameManager()
+
 while corriendo:
     
     reloj.tick(c.FPS)
-    ventana.fill(c.COLOR_BG)
     
-    dibujar_paredes(matriz_mapa, ventana)
-    
-    
-    
-    for evento in pygame.event.get():
+    delta_time = reloj.get_time()
+
+    eventos=pygame.event.get()
+    for evento in eventos:
         if evento.type == pygame.QUIT:
             corriendo=False
+
+    game_manager.update(delta_time, eventos)
+    game_manager.render()
+    
+    
+
             
-    pygame.display.update()
     
 pygame.quit()
     

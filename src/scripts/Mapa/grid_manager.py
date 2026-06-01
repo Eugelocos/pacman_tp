@@ -1,10 +1,13 @@
-from .crear_mapa import crear_mapa
-import pacman_tp.src.constantes as c 
+import os
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from scripts.Mapa.crear_mapa import crear_mapa
+import constantes as c 
 
 class GridManager:
     """Clase que maneja los mapeos entre posiciones discretas y continuas
     """
-    def __init__(self, matriz_mapa,cell_size=32.0, tipos_enemigos: list[str]=["Blinky", "Pinky", "Inky", "Clyde"]):
+    def __init__(self, matriz_mapa,cell_size=32.0, tipos_enemigos: list[str]=["fantasma_amarillo", "fantasma_rosa", "fantasma_rojo", "fantasma_cian"]):
         """Inicializa el GridManager con una cuadrícula y un tamaño de celda."""
         self.grid=crear_mapa(matriz_mapa, None, tipos_enemigos)
         self.width = c.MAPA_ANCHO
@@ -29,10 +32,12 @@ class GridManager:
     def get_cell_by_position(self, pos, entities):
         """Obtiene la entidad en la celda correspondiente a la posición dada, si existe."""
         if not self.check_position(pos): return
+
+        celda_buscada=self.world_to_grid(pos)
         for entity in entities:
-            snapped_pos=self.snap_position((entity.x, entity.y))
+            snapped_pos=self.world_to_grid((entity.rect.x, entity.rect.y))
             if not self.check_position(snapped_pos): continue
-            if snapped_pos==pos:
+            if snapped_pos==celda_buscada:
                 return entity        
     
     def world_to_grid(self, pos):
@@ -55,7 +60,7 @@ class GridManager:
         snapped_y=round(y/self.cell_size)*self.cell_size
         return (snapped_x, snapped_y)
     
-    def check_collision(self, pos, direccion: str, entities):
+    def check_collision(self, pos, direccion, entities):
         """
          Detecta si hay una entidad en la celda hacia la que se está moviendo.
     
@@ -64,11 +69,14 @@ class GridManager:
         que se encuentre en esa celda si existe.
 
         """
-        
+        if not self.check_position(pos): return
         celda_actual=self.world_to_grid(pos)
-        celda_futura=((celda_actual[0]+c.DIRECCIONES[direccion][0]),(celda_actual[1]+c.DIRECCIONES[direccion][1]))
+        celda_futura=((celda_actual[0]+direccion[0]),(celda_actual[1]+direccion[1]))
+        if not self.check_position(self.grid_to_world(celda_futura)): return
         entidad=self.get_cell_by_position(self.grid_to_world(celda_futura),entities)     
         return entidad 
+    
+
         
         
         

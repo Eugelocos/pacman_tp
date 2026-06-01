@@ -1,6 +1,9 @@
 import pygame
-from ...scripts.funciones_aux import cargar_con_transparencia
-from .character_data_type import Personaje
+import os
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from scripts.funciones_aux import cargar_con_transparencia
+from data_structures.character.character_data_type import Personaje
 
 
 class Enemigo(Personaje):
@@ -47,6 +50,12 @@ class Enemigo(Personaje):
 
         self.frame_actual=0
         self.image=self.frames[self.frame_actual]
+
+    def update(self, pantalla, delta_time, escena, eventos=None):
+        self.direction=(0,0)
+        super().update(pantalla, delta_time, escena, eventos)
+
+    
 
 
 

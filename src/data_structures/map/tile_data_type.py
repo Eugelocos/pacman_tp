@@ -1,8 +1,11 @@
-from ..entity import Entity
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from data_structures.entity import Entity
 
 class Tile(Entity):
-    def __init__(self, pos, activo, sprite, is_wall):
-        super().__init__(pos, activo, sprite)
+    def __init__(self, pos, activo, sprite, is_wall, tile_size):
+        super().__init__(pos, activo, tile_size, sprite)
         self.is_wall = is_wall
         self.contains_pellet = False
         self.contains_power_pellet = False
