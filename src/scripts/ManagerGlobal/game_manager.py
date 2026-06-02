@@ -5,7 +5,7 @@ import pygame
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 import constantes as c
 from scripts.ManagerGlobal.game_scene import GameScene
-from scripts.ManagerGlobal.menu_scene import MenuScene
+from scripts.ManagerGlobal.menu_scene import WelcomeScene
 from Mapa.map import matriz_mapa
 from Mapa.grid_manager import GridManager
 
@@ -14,8 +14,8 @@ class GameManager():
         self.entities=pygame.sprite.Group()
         self.scenes={}
         self.ventana=pygame.display.set_mode((c.ANCHO_VENTANA, c.ALTO_VENTANA))
-        self.scenes={"menu": MenuScene(self), "game": GameScene(self), "game_over": GameScene(self)}
-        self.current_scene="game"
+        self.scenes={"welcome": WelcomeScene(self), "game": GameScene(self), "game_over": GameScene(self)}
+        self.current_scene="welcome"
         self.grid_manager = GridManager(matriz_mapa)
         for tile in self.grid_manager.grid:
             self.add_entity(tile)
@@ -33,6 +33,7 @@ class GameManager():
 
     def render(self):
         self.scenes.get(self.current_scene).render()
+    
     def update(self, delta_time=0, eventos=None):
         if eventos is None:
             eventos = pygame.event.get()

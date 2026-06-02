@@ -23,4 +23,12 @@ def contar_elementos(directorio):
 def cargar_con_transparencia(ruta):
     img = pygame.image.load(ruta).convert()  
     img.set_colorkey((0, 0, 0))             
-    return img.convert_alpha()              
+    return img.convert_alpha()       
+
+
+#dibujar texto
+def dibujar_texto(texto, ventana , fuente, color, x, y):
+    img=fuente.render(texto, True, color)
+    ventana.blit(img, (x, y)) 
+    return img
+      
