@@ -7,7 +7,7 @@ import constantes as c
 class GridManager:
     """Clase que maneja los mapeos entre posiciones discretas y continuas
     """
-    def __init__(self, matriz_mapa,cell_size=32.0, tipos_enemigos: list[str]=["fantasma_amarillo", "fantasma_rosa", "fantasma_rojo", "fantasma_cian"]):
+    def __init__(self, matriz_mapa,cell_size=c.TAMAÑO_PARED, tipos_enemigos: list[str]=["fantasma_amarillo", "fantasma_rosa", "fantasma_rojo", "fantasma_cian"]):
         """Inicializa el GridManager con una cuadrícula y un tamaño de celda."""
         self.grid=crear_mapa(matriz_mapa, None, tipos_enemigos)
         self.width = c.MAPA_ANCHO
@@ -35,7 +35,7 @@ class GridManager:
 
         celda_buscada=self.world_to_grid(pos)
         for entity in entities:
-            snapped_pos=self.world_to_grid((entity.rect.x, entity.rect.y))
+            snapped_pos=self.world_to_grid((entity.rect.centerx, entity.rect.centery))
             if not self.check_position(snapped_pos): continue
             if snapped_pos==celda_buscada:
                 return entity        
@@ -50,15 +50,30 @@ class GridManager:
         """Convierte coordenadas de cuadrícula a una posición en el mundo (centro de la celda)."""
         x, y = pos
         tile_size = self.cell_size
-        return (x * tile_size + tile_size / 2, y * tile_size + tile_size / 2)
+        return (x * tile_size + self.cell_size // 2, y * tile_size + self.cell_size // 2)
+    
+    def grid_to_world_center(self, grid_pos):
+        """Devuelve el centro de la celda en píxeles"""
+        x, y = grid_pos
+        return (x * self.cell_size + self.cell_size // 2,
+                y * self.cell_size + self.cell_size // 2)
 
-    def snap_position(self, pos):
+    def snap_position(self, pos, direccion):
         """Ajusta una posición a la cuadrícula más cercana."""
         if not self.check_position(pos): return
         x,y=pos
-        snapped_x=round(x/self.cell_size)*self.cell_size
-        snapped_y=round(y/self.cell_size)*self.cell_size
-        return (snapped_x, snapped_y)
+        grid_x, grid_y=self.world_to_grid(pos)
+        if direccion==(0,0):        
+            snapped_x=grid_x*self.cell_size
+            snapped_y=grid_y*self.cell_size
+            return (snapped_x, snapped_y)
+        elif direccion[1]!=0:
+            snapped_x=grid_x*self.cell_size
+            return (snapped_x, y)
+        elif direccion[0]!=0:
+            snapped_y=grid_y*self.cell_size
+            return (x, snapped_y)
+        return pos
     
     def check_collision(self, pos, direccion, entities):
         """
@@ -76,7 +91,6 @@ class GridManager:
         entidad=self.get_cell_by_position(self.grid_to_world(celda_futura),entities)     
         return entidad 
     
-
         
         
         
