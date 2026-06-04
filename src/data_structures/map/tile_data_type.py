@@ -1,5 +1,6 @@
 import sys
 import os
+import pygame
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from data_structures.entity import Entity
 
@@ -17,3 +18,7 @@ class Tile(Entity):
         self.contains_pellet = False
     def remove_power_pellet(self):
         self.contains_power_pellet = False
+    def draw(self, ventana):
+
+        if self.contains_pellet or self.contains_power_pellet or self.is_wall:
+            super().draw(ventana)

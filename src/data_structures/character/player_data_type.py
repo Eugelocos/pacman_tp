@@ -13,6 +13,8 @@ class Jugador(Personaje):
         self.point=0
         self.nombre=nombre_jugador
         self.is_powered_up=False
+        self.muriendo=False
+        self.tiempo_muerte=0
         if direction not in Jugador.sprites_cache:
             self.cargar_frames()
 
@@ -36,6 +38,7 @@ class Jugador(Personaje):
             Jugador.sprites_cache[direccion.lower()].append(
                 Jugador.sprites_cache[direccion.lower()][1]
             )
+       
         self.cambiar_sprite_por_direccion()
 
 
@@ -71,4 +74,10 @@ class Jugador(Personaje):
                 elif event.key == pygame.K_d and self.direction != (1, 0):
                     self.proxima_direccion=(1,0)
 
+    def draw(self, ventana):
+        if self.lives > 0:
+            super().draw(ventana)
 
+
+    def morir(self):
+        self.image = None

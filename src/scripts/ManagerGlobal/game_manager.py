@@ -6,19 +6,30 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 import constantes as c
 from scripts.ManagerGlobal.game_scene import GameScene
 from scripts.ManagerGlobal.menu_scene import WelcomeScene
+from scripts.ManagerGlobal.game_over import GameOver
 from Mapa.map import matriz_mapa
 from Mapa.grid_manager import GridManager
 
 class GameManager():
     def __init__(self):
-        self.entities=pygame.sprite.Group()
-        self.scenes={}
-        self.ventana=pygame.display.set_mode((c.ANCHO_VENTANA, c.ALTO_VENTANA))
-        self.scenes={"welcome": WelcomeScene(self), "game": GameScene(self), "game_over": GameScene(self)}
-        self.current_scene="welcome"
+        self.entities = pygame.sprite.Group()
+
+        self.ventana = pygame.display.set_mode(
+            (c.ANCHO_VENTANA, c.ALTO_VENTANA)
+        )
+
         self.grid_manager = GridManager(matriz_mapa)
-        for tile in self.grid_manager.grid:
-            self.add_entity(tile)
+
+        for entity in self.grid_manager.grid:
+            self.add_entity(entity)
+
+        self.scenes = {
+            "welcome": WelcomeScene(self),
+            "game": GameScene(self),
+            "game_over": GameOver(self)
+        }
+
+        self.current_scene = "welcome"
         
 
     def add_entity(self, entity):
@@ -33,6 +44,7 @@ class GameManager():
 
     def render(self):
         self.scenes.get(self.current_scene).render()
+        pygame.display.flip()
     
     def update(self, delta_time=0, eventos=None):
         if eventos is None:
@@ -41,4 +53,11 @@ class GameManager():
         self.scenes.get(self.current_scene).update(delta_time, eventos)
         pygame.display.update()
 
+    def resetear_grilla(self):
+        self.entities.empty()
+
+        self.grid_manager = GridManager(matriz_mapa)
+
+        for entity in self.grid_manager.grid:
+            self.add_entity(entity)
 

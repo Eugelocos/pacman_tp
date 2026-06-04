@@ -15,6 +15,8 @@ game_manager = GameManager()
 
 
 # MAIN LOOP
+
+
 corriendo=True
 while corriendo:
     delta_time = reloj.tick(c.FPS)

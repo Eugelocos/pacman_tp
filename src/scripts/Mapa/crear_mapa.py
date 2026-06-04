@@ -10,6 +10,7 @@ from data_structures.map.tile_data_type import Tile
 def crear_mapa(matriz, ventana, tipos_enemigos: list[str]):
     lista_entidades=[]
     lista_personajes=[]
+    posiciones_iniciales_enemigos=[()]
     indice_enemigo=0
     for i in range(len(matriz)):
         for j in range(len(matriz[i])):
@@ -17,7 +18,7 @@ def crear_mapa(matriz, ventana, tipos_enemigos: list[str]):
                 pared=Tile((j*c.TAMAÑO_PARED+ c.TAMAÑO_PARED//2,i*c.TAMAÑO_PARED+ c.TAMAÑO_PARED//2),True,"pacman_tp/assets/imagenes/items/pared.png",True, c.TAMAÑO_PARED)
                 lista_entidades.append(pared)
             elif matriz[i][j]==".":
-                pallet=Tile((j*c.TAMAÑO_PARED+ c.TAMAÑO_PARED//2,i*c.TAMAÑO_PARED+ c.TAMAÑO_PARED//2),True,"pacman_tp/assets/imagenes/items/pellet_pequeño.png",False, c.TAMAÑO_PARED//10)
+                pallet=Tile((j*c.TAMAÑO_PARED+ c.TAMAÑO_PARED//2,i*c.TAMAÑO_PARED+ c.TAMAÑO_PARED//2),True,"pacman_tp/assets/imagenes/items/pellet_pequeño.png",False, c.TAMAÑO_PARED//5)
                 pallet.place_pellet()
                 lista_entidades.append(pallet)
             elif matriz[i][j]=="o":
