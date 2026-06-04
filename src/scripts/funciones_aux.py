@@ -31,4 +31,25 @@ def dibujar_texto(texto, ventana , fuente, color, x, y):
     img=fuente.render(texto, True, color)
     ventana.blit(img, (x, y)) 
     return img
-      
+
+#dibujar fantasma
+def dibujar_fantasma(fantasma,i,ventana,seleccionados):
+    fuente= pygame.font.SysFont("Courier", 30)
+    fuente_pequeña= pygame.font.SysFont("Courier", 20)
+    x_circulo = 180
+    x_numero = 210
+    x_nombre = 240
+    x_rectangulo=100
+    espaciado = 100
+    y = 100 + i * espaciado
+    pygame.draw.circle(ventana, fantasma[3], (x_circulo, y+20), 20, 0)
+    dibujar_texto(f"{i+1}", ventana,fuente,c.BLANCO,x_numero,y)
+    dibujar_texto(f"{fantasma[1]}",ventana,fuente,fantasma[3],x_nombre,y)
+    dibujar_texto(f"{fantasma[2]}",ventana,fuente_pequeña,c.BLANCO,x_nombre,y+30)
+    #dibujar rectangulo que indica que el fantasma se selecciono
+    if fantasma in seleccionados:
+        pygame.draw.rect(ventana, c.BLANCO, (x_rectangulo, y-20, 700, 100),1)
+        
+    
+    
+          

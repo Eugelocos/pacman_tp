@@ -1,6 +1,6 @@
 import pygame
 import constantes as c 
-from funciones_aux import dibujar_texto
+from funciones_aux import dibujar_texto,dibujar_fantasma
 
 class WelcomeScene(): 
     def __init__(self, game_manager):
@@ -9,14 +9,14 @@ class WelcomeScene():
         self.high_score=0 #luego hay que implementar la logica de lectura de archivo donde esta el high score real 
         self.texto=True
         self.tiempo=0
-        self.fuente_titulo = pygame.font.SysFont("comicsans", 70)
-        self.fuente_normal = pygame.font.SysFont("comicsans", 30)
+        self.fuente_titulo = pygame.font.SysFont("Courier", 70)
+        self.fuente_normal = pygame.font.SysFont("Courier", 30)
        
     def update(self,delta_time=0, eventos=None):
         for event in eventos:
             if event.type==pygame.KEYDOWN:
                 if event.key==pygame.K_RETURN:
-                    self.game_manager.change_scene("game")
+                    self.game_manager.change_scene("select_fantasmas")
         self.tiempo+=delta_time
         if self.tiempo>=self.milisegundos:
             self.tiempo=0
@@ -39,10 +39,67 @@ class WelcomeScene():
             y = c.ALTO_VENTANA // 2 + 100
             dibujar_texto("Presiona ENTER para jugar",self.game_manager.ventana,self.fuente_normal, c.BLANCO, x,y)
             
+class SelectFantasmas():
+    def __init__(self,game_manager):
+        self.game_manager=game_manager
+        self.seleccionados=[]
+        self.fuente_titulos=pygame.font.SysFont("Courier", 35)
+        self.fuente_subtitulos=pygame.font.SysFont("Courier", 20)
+        self.fuente_normal=pygame.font.SysFont("Courier", 10)
+
+    def update(self,delta_time=0,eventos=None):
+        for event in eventos:
+            if event.type==pygame.KEYDOWN:
+                if event.key==pygame.K_1:
+                    if c.FANTASMAS[0] not in self.seleccionados and len(self.seleccionados)<4:
+                        self.seleccionados.append(c.FANTASMAS[0])
+                if event.key==pygame.K_2:
+                    if c.FANTASMAS[1] not in self.seleccionados and len(self.seleccionados)<4:
+                        self.seleccionados.append(c.FANTASMAS[1])
+                if event.key==pygame.K_3:
+                    if c.FANTASMAS[2] not in self.seleccionados and len(self.seleccionados)<4:
+                        self.seleccionados.append(c.FANTASMAS[2])
+                if event.key==pygame.K_4:
+                    if c.FANTASMAS[3] not in self.seleccionados and len(self.seleccionados)<4:
+                        self.seleccionados.append(c.FANTASMAS[3])
+                if event.key==pygame.K_5:
+                    if c.FANTASMAS[4] not in self.seleccionados and len(self.seleccionados)<4:
+                        self.seleccionados.append(c.FANTASMAS[4])
+                if event.key==pygame.K_6:
+                    if c.FANTASMAS[5] not in self.seleccionados and len(self.seleccionados)<4:
+                        self.seleccionados.append(c.FANTASMAS[5])
+                if event.key==pygame.K_RETURN and len(self.seleccionados)==4:
+                        self.game_manager.change_scene("game")
+                    
+                    
+    def render(self):
+        self.game_manager.ventana.fill(c.COLOR_BG)
+        x = c.ANCHO_VENTANA // 2 - 250
+        y = c.ALTO_VENTANA // 2 - 350
+        f=len(self.seleccionados) #variable que cambia el numero de fantasmas seleccionados
+        dibujar_texto(f"Elegi 4 fantasmas [{f}/4]",self.game_manager.ventana,self.fuente_titulos, c.AMARILLO, x,y)
+        for i in range(6):
+            fantasma=c.FANTASMAS[i]
+            dibujar_fantasma(fantasma,i,self.game_manager.ventana,self.seleccionados)
+
+class SelectEsquinas():
+    def __init__(self,game_manager):    
+        self.game_manager=game_manager
         
         
         
+    def update(self):
+        pass
+    
+    def render(self):
+        pass        
+            
+
         
+                
+        
+        
+
         
 
 #dibujar texto
