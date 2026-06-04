@@ -5,7 +5,7 @@ import pygame
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 import constantes as c
 from scripts.ManagerGlobal.game_scene import GameScene
-from scripts.ManagerGlobal.menu_scene import WelcomeScene
+from scripts.ManagerGlobal.menu_scene import WelcomeScene, SelectFantasmas
 from scripts.ManagerGlobal.game_over import GameOver
 from Mapa.map import matriz_mapa
 from Mapa.grid_manager import GridManager
@@ -25,6 +25,7 @@ class GameManager():
 
         self.scenes = {
             "welcome": WelcomeScene(self),
+            "select_fantasmas": SelectFantasmas(self),
             "game": GameScene(self),
             "game_over": GameOver(self)
         }
