@@ -16,7 +16,7 @@ class Personaje(Entity):
         self.frames = [self.image]
         self.frame_actual = 0
         self.frame_timer = 0
-        self.frame_delay = 100
+        self.frame_delay = 40
 
 
     def cambiar_direccion(self, new_dir):
@@ -33,7 +33,7 @@ class Personaje(Entity):
             self.image=self.frames[self.frame_actual]
     
     def update(self, ventana, delta_time, escena=None, eventos=None):
-        manejar_movimiento(self, escena, self.direction, delta_time)
+        manejar_movimiento(self, escena, delta_time)
         super().update(ventana, delta_time, escena, eventos)
 
 

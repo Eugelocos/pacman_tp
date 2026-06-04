@@ -13,6 +13,8 @@ class Jugador(Personaje):
         self.point=0
         self.nombre=nombre_jugador
         self.is_powered_up=False
+        self.muriendo=False
+        self.tiempo_muerte=0
         if direction not in Jugador.sprites_cache:
             self.cargar_frames()
 
@@ -33,7 +35,10 @@ class Jugador(Personaje):
                         Jugador.sprites_cache[direccion.lower()].append(pygame.transform.scale(pygame.transform.flip(cargar_con_transparencia(ruta), False, True), (self.tile_size, self.tile_size)))
                     else:
                         Jugador.sprites_cache[direccion.lower()].append(pygame.transform.scale(cargar_con_transparencia(ruta), (self.tile_size, self.tile_size)))
-
+            Jugador.sprites_cache[direccion.lower()].append(
+                Jugador.sprites_cache[direccion.lower()][1]
+            )
+       
         self.cambiar_sprite_por_direccion()
 
 
@@ -51,6 +56,7 @@ class Jugador(Personaje):
         self.image=self.frames[self.frame_actual]
 
     def update(self, ventana, delta_time, escena, eventos=None):
+        
         self.leer_inputs(eventos)
         super().update(ventana, delta_time, escena, eventos)
 
@@ -59,12 +65,19 @@ class Jugador(Personaje):
             eventos = pygame.event.get()
         for event in eventos:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_w:
+                if event.key == pygame.K_w and self.direction != (0, -1):
                     self.proxima_direccion=(0,-1)
-                elif event.key == pygame.K_s:
+                elif event.key == pygame.K_s and self.direction != (0, 1):
                     self.proxima_direccion=(0,1)
-                elif event.key == pygame.K_a:
+                elif event.key == pygame.K_a and self.direction != (-1, 0):
                     self.proxima_direccion=(-1,0)
-                elif event.key == pygame.K_d:
+                elif event.key == pygame.K_d and self.direction != (1, 0):
                     self.proxima_direccion=(1,0)
 
+    def draw(self, ventana):
+        if self.lives > 0:
+            super().draw(ventana)
+
+
+    def morir(self):
+        self.image = None

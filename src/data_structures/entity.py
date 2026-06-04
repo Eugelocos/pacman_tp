@@ -23,7 +23,6 @@ class Entity(pygame.sprite.Sprite):
         pantalla.blit(self.image, (self.rect.x, self.rect.y))
     def update(self, ventana,  delta_time, escena=None, eventos=None):
         self.actualizar_animacion(delta_time) 
-        self.draw(ventana)
     def actualizar_animacion(self, delta_time):
         pass
 

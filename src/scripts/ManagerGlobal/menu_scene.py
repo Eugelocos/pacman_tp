@@ -110,3 +110,5 @@ def dibujar_texto(texto, ventana , fuente, color, x, y):
         
     
     
+    
+    
