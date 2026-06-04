@@ -21,10 +21,27 @@ AZUL=(0,0,255)
 BLANCO=(255,255,255)
 AMARILLO = (255, 255, 0)
 VERDE=(50, 205, 50)
+ROJO=(255, 0, 0)
+ROSA=(255, 182, 193)
+CIAN=(0, 255, 255)
+NARANJA=(255, 165, 0)
+VERDE=(0, 255, 0)
+VIOLETA=(148, 0, 211)
+
 
 #JUGADOR
 VELOCIDAD_BASE=5
 
 #PARPADEO PRINCIPAL
 PARPADEO=100
+
+#FANTASMAS 
+FANTASMAS = [
+    ("fantasma_rojo", "Blinky", "Rojo - El perseguidor.", ROJO),
+    ("fantasma_rosa", "Pinky", "Rosa - El emboscador.", ROSA),
+    ("fantasma_cian", "Inky", "Celeste - El flanqueador.", CIAN),
+    ("fantasma_naranja", "Clyde", "Naranja - El tímido.", NARANJA),
+    ("fantasma_verde", "Figo", "Verde - El traidor.", VERDE),
+    ("fantasma_violeta", "Michael", "Violeta - El kamikaze.", VIOLETA),
+]
 
