@@ -6,7 +6,7 @@ from scripts.Movimiento.movimiento import manejar_movimiento
 import constantes as c
 
 class Personaje(Entity):
-    DIRECTIONS={"arriba":(0,-1),"abajo":(0,1),"derecha":(1, 0),"izquierda":(-1,0)}
+    DIRECTIONS={"arriba":(0,-1),"abajo":(0,1),"derecha":(1, 0),"izquierda":(-1,0), "idle":(0,0)}
     def __init__(self,position, visibility, direction, tile_size, sprite):
         super().__init__(position, visibility, tile_size, sprite)
 

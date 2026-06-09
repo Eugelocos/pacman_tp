@@ -8,6 +8,7 @@ from scripts.ManagerGlobal.game_manager import GameManager
 
 
 pygame.init()
+
 # controlar FPS (framerate)
 reloj=pygame.time.Clock()
 
@@ -15,8 +16,6 @@ game_manager = GameManager()
 
 
 # MAIN LOOP
-
-
 corriendo=True
 while corriendo:
     delta_time = reloj.tick(c.FPS)
@@ -33,5 +32,4 @@ while corriendo:
 
 # EXIT
 pygame.quit()
-    
-    
+

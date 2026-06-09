@@ -8,7 +8,7 @@ from data_structures.character.character_data_type import Personaje
 
 class Enemigo(Personaje):
     sprites_cache={}
-    def __init__(self, position, visibility, nombre_enemigo, tile_size, direction="derecha", state=0, target=None, ):
+    def __init__(self, position, visibility, nombre_enemigo, tile_size, direction="derecha", state=0, pos_inicial=(0,0), target=(0,0)):
         ruta_inicial = f"pacman_tp/assets/imagenes/characters/enemies/{nombre_enemigo}/horizontal/{nombre_enemigo}_0.png"
         super().__init__(position, visibility, direction, tile_size, ruta_inicial )
         self.state=state

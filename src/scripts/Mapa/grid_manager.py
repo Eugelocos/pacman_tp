@@ -7,7 +7,7 @@ import constantes as c
 class GridManager:
     """Clase que maneja los mapeos entre posiciones discretas y continuas
     """
-    def __init__(self, matriz_mapa,cell_size=c.TAMAÑO_PARED, tipos_enemigos: list[str]=["fantasma_amarillo", "fantasma_rosa", "fantasma_rojo", "fantasma_cian"]):
+    def __init__(self, matriz_mapa,cell_size=c.TAMAÑO_PARED, tipos_enemigos: list[tuple[str, tuple[int,int]]]=[("fantasma_amarillo", (0,2)), ("fantasma_rosa", (0,29)), ("fantasma_rojo", (30,2)), ("fantasma_cian", (30, 29))]):
         """Inicializa el GridManager con una cuadrícula y un tamaño de celda."""
         self.grid=crear_mapa(matriz_mapa, None, tipos_enemigos)
         self.width = c.MAPA_ANCHO

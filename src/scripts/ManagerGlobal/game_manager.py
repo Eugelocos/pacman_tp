@@ -15,9 +15,10 @@ class GameManager():
         self.entities = pygame.sprite.Group()
 
         self.ventana = pygame.display.set_mode(
-            (c.ANCHO_VENTANA, c.ALTO_VENTANA)
+            (c.ANCHO_VENTANA, c.ALTO_VENTANA), 
+            pygame.RESIZABLE
         )
-
+        self.tipo_enemigos=[] # [("fantasma_... ,  (esquina)"), ... ]
         self.grid_manager = GridManager(matriz_mapa)
 
         for entity in self.grid_manager.grid:
