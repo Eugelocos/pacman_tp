@@ -48,7 +48,26 @@ def dibujar_fantasma(fantasma,i,ventana,seleccionados):
     dibujar_texto(f"{fantasma[2]}",ventana,fuente_pequeña,c.BLANCO,x_nombre,y+30)
     #dibujar rectangulo que indica que el fantasma se selecciono
     if fantasma in seleccionados:
-        pygame.draw.rect(ventana, c.BLANCO, (x_rectangulo, y-20, 700, 100),1)
+        pygame.draw.rect(ventana, c.BLANCO, (x_rectangulo, y-20, 700, 80),1)
+        
+#seleccionar esquinas
+def dibujar_selec_esquinas(ventana,seleccionado,i,esquinas):
+    fuente= pygame.font.SysFont("Courier", 30)
+    fuente_pequeña= pygame.font.SysFont("Courier", 25)
+    x=100
+    y=20
+    nombre=seleccionado[1]
+    color=seleccionado[3]
+    dibujar_texto(f"Asigná una esquina a {nombre} ({i}/4):",ventana,fuente,color,x,y)
+    opciones = [(0,0), (28,0), (0,31), (28,31)]
+    nombres_esquinas = ["Superior izquierda", "Superior derecha", "Inferior izquierda", "Inferior derecha"]
+    for n, (esquina, nombre_esquina) in enumerate(zip(opciones, nombres_esquinas), 1):
+        if esquina in esquinas:
+            color_numero = c.GRIS
+        else:
+            color_numero = c.BLANCO
+        dibujar_texto(f"{n}. {nombre_esquina}", ventana, fuente_pequeña, color_numero, x+150, y+50+(n*100))
+    
         
     
     
