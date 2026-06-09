@@ -27,7 +27,7 @@ CIAN=(0, 255, 255)
 NARANJA=(255, 165, 0)
 VERDE=(0, 255, 0)
 VIOLETA=(148, 0, 211)
-
+GRIS=(128, 128, 128)
 
 #JUGADOR
 VELOCIDAD_BASE=7.5*TAMAÑO_PARED
@@ -37,7 +37,7 @@ PARPADEO=100
 
 #FANTASMAS 
 FANTASMAS = [
-    ("fantasma_rojo", "Blinky", "Rojo - El perseguidor.", ROJO),
+    ("fantasma_rojo", "Blinky", "Rojo - El perseguidor.", ROJO,),
     ("fantasma_rosa", "Pinky", "Rosa - El emboscador.", ROSA),
     ("fantasma_cian", "Inky", "Celeste - El flanqueador.", CIAN),
     ("fantasma_naranja", "Clyde", "Naranja - El tímido.", NARANJA),
