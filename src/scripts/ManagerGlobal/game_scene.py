@@ -63,7 +63,6 @@ class GameScene():
             return
         
         entidad_colisionada = pygame.sprite.spritecollideany(jugador, self.game_manager.entities)
-        print(f"Colisionando con: {entidad_colisionada}")
         if isinstance(entidad_colisionada, Tile):
             if entidad_colisionada.contains_pellet:
                 entidad_colisionada.remove_pellet()
@@ -71,7 +70,7 @@ class GameScene():
             elif entidad_colisionada.contains_power_pellet:
                 entidad_colisionada.remove_power_pellet()
                 self.score += 50
-                jugador.is_powered_up = True
+                #jugador.is_powered_up = True
         elif isinstance(entidad_colisionada, Enemigo):
             if jugador.is_powered_up:
                 entidad_colisionada.kill()

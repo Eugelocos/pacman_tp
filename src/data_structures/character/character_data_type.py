@@ -7,7 +7,7 @@ import constantes as c
 
 class Personaje(Entity):
     DIRECTIONS={"arriba":(0,-1),"abajo":(0,1),"derecha":(1, 0),"izquierda":(-1,0), "idle":(0,0)}
-    def __init__(self,position, visibility, direction, tile_size, sprite):
+    def __init__(self,position, visibility, direction, tile_size, sprite, es_jugador):
         super().__init__(position, visibility, tile_size, sprite)
 
         self.velocidad=c.VELOCIDAD_BASE
@@ -17,6 +17,7 @@ class Personaje(Entity):
         self.frame_actual = 0
         self.frame_timer = 0
         self.frame_delay = 40
+        self.es_jugador = es_jugador
 
 
     def cambiar_direccion(self, new_dir):
@@ -33,6 +34,7 @@ class Personaje(Entity):
             self.image=self.frames[self.frame_actual]
     
     def update(self, ventana, delta_time, escena=None, eventos=None):
+        
         manejar_movimiento(self, escena, delta_time)
         super().update(ventana, delta_time, escena, eventos)
 

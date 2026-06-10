@@ -33,7 +33,7 @@ def crear_mapa(matriz, ventana, tipos_enemigos: list[tuple[str, tuple[int, int]]
                 target_inicial=(tipos_enemigos[indice_enemigo][1][0]*c.TAMAÑO_PARED + c.TAMAÑO_PARED//2,tipos_enemigos[indice_enemigo][1][1]*c.TAMAÑO_PARED+ c.TAMAÑO_PARED//2)
                 pos=(posiciones_iniciales_fantasmas[indice_enemigo][0]*c.TAMAÑO_PARED+ c.TAMAÑO_PARED//2, posiciones_iniciales_fantasmas[indice_enemigo][1]*c.TAMAÑO_PARED+ c.TAMAÑO_PARED//2)
                 # ATENCION! => se debe implementar logica de maximos fantasmas y spawnear en pos_inicial     <<< cambio importante
-                enemigo=Enemigo(pos,True,tipos_enemigos[indice_enemigo][0],c.TAMAÑO_PARED, "idle", pos_inicial=target_inicial, state="reaparicion")
+                enemigo=Enemigo(pos,True,tipos_enemigos[indice_enemigo][0],c.TAMAÑO_PARED, "idle", pos_inicial=target_inicial, state="scatter")
                 lista_personajes.append(enemigo)
                 indice_enemigo+=1
 

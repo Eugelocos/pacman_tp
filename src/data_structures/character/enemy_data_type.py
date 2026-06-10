@@ -2,19 +2,20 @@ import pygame
 import os
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-from scripts.funciones_aux import cargar_con_transparencia
 from data_structures.character.character_data_type import Personaje
+from scripts.Fantasmas.phantom import decidir_movimiento
 
 
 class Enemigo(Personaje):
     sprites_cache={}
-    def __init__(self, position, visibility, nombre_enemigo, tile_size, direction="derecha", state=0, pos_inicial=(0,0), target=(0,0)):
+    def __init__(self, position, visibility, nombre_enemigo, tile_size, direction="derecha", state='scatter', pos_inicial=(0,0), target=(0,0)):
         ruta_inicial = f"pacman_tp/assets/imagenes/characters/enemies/{nombre_enemigo}/horizontal/{nombre_enemigo}_0.png"
-        super().__init__(position, visibility, direction, tile_size, ruta_inicial )
+        super().__init__(position, visibility, direction, tile_size, ruta_inicial, False)
         self.state=state
-        self.pos_inicial=0
+        self.pos_inicial=pos_inicial
         self.target=target
         self.nombre_enemigo=nombre_enemigo
+        self.jugador_ref=None
         if self.nombre_enemigo not in Enemigo.sprites_cache:
             self.cargar_frames()
 
@@ -52,10 +53,20 @@ class Enemigo(Personaje):
         self.image=self.frames[self.frame_actual]
 
     def update(self, pantalla, delta_time, escena, eventos=None):
-        self.direction=(0,0)
+        if not self.jugador_ref:
+            self.jugador_ref = escena.jugador
+
+
+        self.proxima_direccion=decidir_movimiento(self.jugador_ref, self, escena.game_manager)
+
+
         super().update(pantalla, delta_time, escena, eventos)
 
     
 
 
 
+def cargar_con_transparencia(ruta):
+    img = pygame.image.load(ruta).convert()  
+    img.set_colorkey((0, 0, 0))             
+    return img.convert_alpha()  

@@ -2,13 +2,13 @@ import pygame
 import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-from scripts.funciones_aux import cargar_con_transparencia
 from data_structures.character.character_data_type import Personaje
+
 class Jugador(Personaje):
     sprites_cache={}
     def __init__(self, position, visibility, nombre_jugador, direction, tile_size, lives=3):
         ruta_inicial = f"pacman_tp/assets/imagenes/characters/{nombre_jugador}/horizontal/{nombre_jugador}_0.png"
-        super().__init__(position, visibility, direction, tile_size, ruta_inicial )
+        super().__init__(position, visibility, direction, tile_size, ruta_inicial, True)
         self.lives=lives
         self.point=0
         self.nombre=nombre_jugador
@@ -81,3 +81,10 @@ class Jugador(Personaje):
 
     def morir(self):
         self.image = None
+
+
+
+def cargar_con_transparencia(ruta):
+    img = pygame.image.load(ruta).convert()  
+    img.set_colorkey((0, 0, 0))             
+    return img.convert_alpha()  
