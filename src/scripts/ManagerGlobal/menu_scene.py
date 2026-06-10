@@ -1,6 +1,9 @@
 import pygame
+import os
 import constantes as c 
 from funciones_aux import dibujar_texto,dibujar_fantasma,dibujar_selec_esquinas
+
+ruta_fuente = os.path.join("pacman_tp","assets", "fonts", "PressStart2P.ttf")
 
 class WelcomeScene(): 
     def __init__(self, game_manager):
@@ -9,8 +12,7 @@ class WelcomeScene():
         self.high_score=0 #luego hay que implementar la logica de lectura de archivo donde esta el high score real 
         self.texto=True
         self.tiempo=0
-        self.fuente_titulo = pygame.font.SysFont("Courier", 70)
-        self.fuente_normal = pygame.font.SysFont("Courier", 30)
+
        
     def update(self,delta_time=0, eventos=None):
         for event in eventos:
@@ -23,108 +25,79 @@ class WelcomeScene():
             self.texto=not self.texto
                                 
     def render(self):
+        ancho_actual, alto_actual = self.game_manager.ventana.get_size()
+        self.fuente_titulo = pygame.font.Font(ruta_fuente, 50)
+        self.fuente_normal = pygame.font.Font(ruta_fuente, 30)
+        margen=20
         self.game_manager.ventana.fill(c.COLOR_BG)
-        x = c.ANCHO_VENTANA // 2 - 100
-        y = c.ALTO_VENTANA // 2 - 300
-        dibujar_texto("HIGH SCORE:",self.game_manager.ventana,self.fuente_normal, c.BLANCO, x,y)
+        x = ancho_actual // 2
+        y = alto_actual *  3 // 16
+        dibujar_texto("HIGH SCORE:", self.game_manager.ventana, self.fuente_normal, c.BLANCO, x, y, True)
      
-        y = c.ALTO_VENTANA // 2 - 250
-        dibujar_texto(str(self.high_score),self.game_manager.ventana,self.fuente_normal, c.VERDE, x,y)
-        x = c.ANCHO_VENTANA // 2 - 150
-        y = c.ALTO_VENTANA // 2 
-        dibujar_texto("PAC-MAN",self.game_manager.ventana,self.fuente_titulo, c.AMARILLO, x,y)
-        
+        x = ancho_actual // 2
+        y = alto_actual *  4 // 16       
+        dibujar_texto(str(self.high_score),self.game_manager.ventana,self.fuente_normal, c.VERDE, x,y, True)
+
+        x = ancho_actual // 2
+        y = alto_actual *  8 // 16        
+        dibujar_texto("PAC-MAN",self.game_manager.ventana,self.fuente_titulo, c.AMARILLO, x,y, True)
+
         if self.texto: 
-            x = c.ANCHO_VENTANA // 2 - 170
-            y = c.ALTO_VENTANA // 2 + 100
-            dibujar_texto("Presiona ENTER para jugar",self.game_manager.ventana,self.fuente_normal, c.BLANCO, x,y)
+            x = ancho_actual // 2
+            y = alto_actual * 11 // 16            
+            dibujar_texto("Presiona ENTER para jugar",self.game_manager.ventana,self.fuente_normal, c.BLANCO, x,y, True)
             
 class SelectFantasmas():
+
     def __init__(self,game_manager):
         self.game_manager=game_manager
         self.seleccionados=[]
-        self.fuente_titulos=pygame.font.SysFont("Courier", 35)
+        self.fuente_titulos=pygame.font.Font(ruta_fuente, 30)
 
     def update(self,delta_time=0,eventos=None):
         for event in eventos:
             if event.type==pygame.KEYDOWN:
-                if event.key==pygame.K_1:
-                    if c.FANTASMAS[0] not in self.seleccionados:
+                tecla_indice = {
+                    pygame.K_1: 0,
+                    pygame.K_2: 1,
+                    pygame.K_3: 2,
+                    pygame.K_4: 3,
+                    pygame.K_5: 4,
+                    pygame.K_6: 5,
+                }
+                if event.key in tecla_indice:
+                    indice = tecla_indice[event.key]
+                    fantasma = c.FANTASMAS[indice]
+                    if fantasma not in self.seleccionados:
                         if len(self.seleccionados)<4:
-                            self.seleccionados.append(c.FANTASMAS[0])
+                            self.seleccionados.append(fantasma)
                         elif len(self.seleccionados)==4:
-                            self.seleccionados.remove(self.seleccionados[0])
-                            self.seleccionados.append(c.FANTASMAS[0])
-                    elif c.FANTASMAS[0] in self.seleccionados:
-                        self.seleccionados.remove(c.FANTASMAS[0])
-                if event.key==pygame.K_2:
-                    if c.FANTASMAS[1] not in self.seleccionados:
-                        if len(self.seleccionados)<4:
-                            self.seleccionados.append(c.FANTASMAS[1])
-                        elif len(self.seleccionados)==4:
-                            self.seleccionados.remove(self.seleccionados[0])
-                            self.seleccionados.append(c.FANTASMAS[1])
-                    elif c.FANTASMAS[1] in self.seleccionados:
-                        self.seleccionados.remove(c.FANTASMAS[1])
-                if event.key==pygame.K_3:
-                    if c.FANTASMAS[2] not in self.seleccionados:
-                        if len(self.seleccionados)<4:
-                            self.seleccionados.append(c.FANTASMAS[2])
-                        elif len(self.seleccionados)==4:
-                            self.seleccionados.remove(self.seleccionados[0])
-                            self.seleccionados.append(c.FANTASMAS[2])
-                    elif c.FANTASMAS[2] in self.seleccionados:
-                        self.seleccionados.remove(c.FANTASMAS[2])
-                if event.key==pygame.K_4:
-                    if c.FANTASMAS[3] not in self.seleccionados:
-                        if len(self.seleccionados)<4:
-                            self.seleccionados.append(c.FANTASMAS[3])
-                        elif len(self.seleccionados)==4:
-                            self.seleccionados.remove(self.seleccionados[0])
-                            self.seleccionados.append(c.FANTASMAS[3])
-                    elif c.FANTASMAS[3] in self.seleccionados:
-                        self.seleccionados.remove(c.FANTASMAS[3])
-                if event.key==pygame.K_5:
-                    if c.FANTASMAS[4] not in self.seleccionados:
-                        if len(self.seleccionados)<4:
-                            self.seleccionados.append(c.FANTASMAS[4])
-                        elif len(self.seleccionados)==4:
-                            self.seleccionados.remove(self.seleccionados[0])
-                            self.seleccionados.append(c.FANTASMAS[4])
-                    elif c.FANTASMAS[4] in self.seleccionados:
-                        self.seleccionados.remove(c.FANTASMAS[4])
-                if event.key==pygame.K_6:
-                    if c.FANTASMAS[5] not in self.seleccionados:
-                        if len(self.seleccionados)<4:
-                            self.seleccionados.append(c.FANTASMAS[5])
-                        elif len(self.seleccionados)==4:
-                            self.seleccionados.remove(self.seleccionados[0])
-                            self.seleccionados.append(c.FANTASMAS[5])
-                    elif c.FANTASMAS[5] in self.seleccionados:
-                        self.seleccionados.remove(c.FANTASMAS[5])
+                            self.seleccionados.pop(0)
+                            self.seleccionados.append(fantasma)
+                    elif fantasma in self.seleccionados:
+                        self.seleccionados.remove(fantasma)
                 if event.key==pygame.K_RETURN and len(self.seleccionados)==4:
-                        self.game_manager.scenes["select_esquinas"]=SelectEsquinas(self.game_manager,self.seleccionados)
-                        self.game_manager.change_scene("select_esquinas")
-                    
-                    
+                    self.game_manager.scenes["select_esquinas"]=SelectEsquinas(self.game_manager,self.seleccionados)
+                    self.game_manager.change_scene("select_esquinas")
+
     def render(self):
+        ancho_actual, alto_actual = self.game_manager.ventana.get_size()
         self.game_manager.ventana.fill(c.COLOR_BG)
-        x = c.ANCHO_VENTANA // 2 - 250
-        y = c.ALTO_VENTANA // 2 - 350
-        f=len(self.seleccionados) #variable que cambia el numero de fantasmas seleccionados
-        dibujar_texto(f"Elegi 4 fantasmas [{f}/4]",self.game_manager.ventana,self.fuente_titulos, c.AMARILLO, x,y)
+        x = ancho_actual // 2
+        y = alto_actual *  2 // 16
+        f=len(self.seleccionados) # variable que cambia el numero de fantasmas seleccionados
+        dibujar_texto(f"Elegi 4 fantasmas [{f}/4]",self.game_manager.ventana,self.fuente_titulos, c.AMARILLO, x,y, True)
         for i in range(6):
-            fantasma=c.FANTASMAS[i]
-            dibujar_fantasma(fantasma,i,self.game_manager.ventana,self.seleccionados)
+            dibujar_fantasma(i,self.game_manager.ventana,self.seleccionados, ruta_fuente)
 
 class SelectEsquinas():
     def __init__(self,game_manager, lista_fantasmas):    
         self.game_manager=game_manager
         self.fantasmas=lista_fantasmas
         self.esquinas=[]
-        self.fuente_titulos=pygame.font.SysFont("Courier", 35)
-        self.fuente_subtitulos=pygame.font.SysFont("Courier", 20)
-        self.fuente_normal=pygame.font.SysFont("Courier", 10)
+        self.fuente_titulos=pygame.font.Font(ruta_fuente, 35)
+        self.fuente_subtitulos=pygame.font.Font(ruta_fuente, 20)
+        self.fuente_normal=pygame.font.Font(ruta_fuente, 10)
     
     def update(self,delta_time=0,eventos=None):
         sup_izq=(0,0)
@@ -154,7 +127,7 @@ class SelectEsquinas():
         self.game_manager.ventana.fill(c.COLOR_BG)
         f=len(self.esquinas)
         if f<4:
-            dibujar_selec_esquinas(self.game_manager.ventana,self.fantasmas[f],len(self.esquinas)+1,self.esquinas)
+            dibujar_selec_esquinas(self.game_manager.ventana,self.fantasmas[f],len(self.esquinas)+1,self.esquinas, ruta_fuente)
     
         
     
