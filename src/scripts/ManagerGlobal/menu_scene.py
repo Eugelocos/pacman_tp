@@ -125,6 +125,7 @@ class SelectEsquinas():
                 if len(self.esquinas)==4:
                     lista_enemigos = [(fantasma[0], esquina) for fantasma, esquina in zip(self.fantasmas, self.esquinas)]
                     self.game_manager.actualizar_enemigos(lista_enemigos)
+                    self.game_manager.scenes["game"] = GameScene(self.game_manager)
                     self.game_manager.change_scene("game")
         
     

@@ -22,7 +22,6 @@ class GameScene():
         Returns:
             Jugador: la instancia jugador, si existe, o None si no se encontró.
         """
-        print(f"Entidades en el juego: {self.game_manager.entities}")
         for entity in self.game_manager.entities:
             if isinstance(entity, Jugador):
                 return entity
@@ -41,7 +40,6 @@ class GameScene():
             self.game_manager.resetear_grilla()
             self.game_manager.scenes["game"] = GameScene(self.game_manager)
             self.game_manager.change_scene("game_over")
-            print("cambiando escena")
             return
         if not self.check_pellets():
             self.reiniciar()
