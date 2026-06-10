@@ -123,8 +123,8 @@ class SelectEsquinas():
                     if inf_der not in self.esquinas and len(self.esquinas)<4:
                         self.esquinas.append(inf_der)  
                 if len(self.esquinas)==4:
-                    self.game_manager.tipo_enemigos=self.fantasmas
-                    self.game_manager.scenes["game"]=GameScene(self.game_manager)
+                    lista_enemigos = [(fantasma[0], esquina) for fantasma, esquina in zip(self.fantasmas, self.esquinas)]
+                    self.game_manager.actualizar_enemigos(lista_enemigos)
                     self.game_manager.change_scene("game")
         
     
