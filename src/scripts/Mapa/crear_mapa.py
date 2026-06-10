@@ -26,7 +26,7 @@ def crear_mapa(matriz, ventana, tipos_enemigos: list[tuple[str, tuple[int, int]]
                 power_pellet.place_power_pellet()
                 lista_entidades.append(power_pellet)
             elif matriz[i][j]=="P":
-                jugador=Jugador((j*c.TAMAÑO_PARED+ c.TAMAÑO_PARED//2,i*c.TAMAÑO_PARED+ c.TAMAÑO_PARED//2), True, "pacman", "derecha", c.TAMAÑO_PARED)
+                jugador=Jugador((j*c.TAMAÑO_PARED+ c.TAMAÑO_PARED//2,i*c.TAMAÑO_PARED+ c.TAMAÑO_PARED//2), True, "pacman", "idle", c.TAMAÑO_PARED)
                 lista_personajes.append(jugador)
             elif matriz[i][j]=="G" and indice_enemigo < len(tipos_enemigos):
 

@@ -127,7 +127,7 @@ class SelectEsquinas():
 
                     
                     self.game_manager.actualizar_enemigos(lista_enemigos)
-
+                    self.game_manager.scenes["game"] = GameScene(self.game_manager)
                     self.game_manager.change_scene("game")
         
     
