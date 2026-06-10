@@ -1,6 +1,10 @@
 import pygame
 import constantes as c 
-from funciones_aux import dibujar_texto,dibujar_fantasma,dibujar_selec_esquinas
+import os
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from scripts.funciones_aux import dibujar_texto,dibujar_fantasma,dibujar_selec_esquinas
+from scripts.ManagerGlobal.game_scene import GameScene
 
 class WelcomeScene(): 
     def __init__(self, game_manager):
@@ -146,6 +150,8 @@ class SelectEsquinas():
                     if inf_der not in self.esquinas and len(self.esquinas)<4:
                         self.esquinas.append(inf_der)  
                 if len(self.esquinas)==4:
+                    self.game_manager.tipo_enemigos=self.fantasmas
+                    self.game_manager.scenes["game"]=GameScene(self.game_manager)
                     self.game_manager.change_scene("game")
         
     

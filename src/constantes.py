@@ -40,7 +40,7 @@ FANTASMAS = [
     ("fantasma_rojo", "Blinky", "Rojo - El perseguidor.", ROJO,),
     ("fantasma_rosa", "Pinky", "Rosa - El emboscador.", ROSA),
     ("fantasma_cian", "Inky", "Celeste - El flanqueador.", CIAN),
-    ("fantasma_naranja", "Clyde", "Naranja - El tímido.", NARANJA),
+    ("fantasma_amarillo", "Clyde", "Naranja - El tímido.", NARANJA),
     ("fantasma_verde", "Artola", "Verde - El traidor.", VERDE),
     ("fantasma_violeta", "Michae", "Violeta - El kamikaze.", VIOLETA),
 ]
