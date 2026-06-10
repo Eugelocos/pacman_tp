@@ -18,7 +18,7 @@ class GameManager():
             (c.ANCHO_VENTANA, c.ALTO_VENTANA), 
             pygame.RESIZABLE
         )
-        self.tipo_enemigos=[] # [("fantasma_... ,  (esquina)"), ... ]
+        self.tipos_enemigos=[] # [("fantasma_... ,  (esquina)"), ... ]
         self.grid_manager = GridManager(matriz_mapa)
 
         for entity in self.grid_manager.grid:
@@ -58,8 +58,11 @@ class GameManager():
     def resetear_grilla(self):
         self.entities.empty()
 
-        self.grid_manager = GridManager(matriz_mapa)
+        self.grid_manager = GridManager(matriz_mapa, tipos_enemigos=self.tipos_enemigos)
 
         for entity in self.grid_manager.grid:
             self.add_entity(entity)
 
+    def actualizar_enemigos(self, nuevos_enemigos):
+        self.tipos_enemigos=nuevos_enemigos
+        self.resetear_grilla()
