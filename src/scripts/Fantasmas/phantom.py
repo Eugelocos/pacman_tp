@@ -3,7 +3,7 @@ import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 import constantes as c
-from scripts.Utils.utilidades_colision import es_pared_en_celda
+from scripts.Utils.utilidades_colision import es_pared_en_celda, es_target_en_celda
 
 def decidir_movimiento(jugador, fantasma, game_manager):
     # Lógica para decidir la dirección del fantasma
@@ -27,21 +27,29 @@ def decidir_movimiento(jugador, fantasma, game_manager):
 
     if centrado:
         target = decidir_target(jugador, fantasma, escena)
+
+        if es_target_en_celda(fantasma, target, escena):
+            print(f"🎯 {fantasma.nombre_enemigo} llegó a {target}")
+            manejar_llegada_al_target(fantasma, escena)
         return decidir_direccion(fantasma, target, escena)
 
     return fantasma.direction
 
 def decidir_target(jugador, fantasma, escena):
     target=None
-    if fantasma.state=="scatter":
-        target=fantasma.pos_inicial
-    elif fantasma.state=="chase":
-        if fantasma.name=="fantasma_rojo":
-            target=escena.game_manager.grid_manager.world_to_grid((jugador.rect.centerx, jugador.rect.centery))
-        else:
-            target=(13, 11)
-    elif fantasma.state=="muerto":
+    if fantasma.esta_en_casa:
         target=(13, 11)
+    else:
+        if fantasma.state=="scatter":
+            target=fantasma.pos_inicial
+        elif fantasma.state=="chase":
+            if fantasma.name=="fantasma_rojo":
+                target=escena.game_manager.grid_manager.world_to_grid((jugador.rect.centerx, jugador.rect.centery))
+            else:
+                target=(13, 11)
+        elif fantasma.state=="muerto":
+            target=(13, 11)
+            
 
     return target
 
@@ -66,3 +74,8 @@ def decidir_direccion(fantasma, target, escena):
 
 
 
+def manejar_llegada_al_target(fantasma, escena):
+    if fantasma.esta_en_casa:
+        fantasma.esta_en_casa=False
+    # else:
+    #   otros tipos de casos

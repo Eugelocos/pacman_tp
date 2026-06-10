@@ -62,27 +62,30 @@ class GameScene():
         if jugador is None:
             return
         
-        entidad_colisionada = pygame.sprite.spritecollideany(jugador, self.game_manager.entities)
-        if isinstance(entidad_colisionada, Tile):
-            if entidad_colisionada.contains_pellet:
-                entidad_colisionada.remove_pellet()
-                self.score += 10
-            elif entidad_colisionada.contains_power_pellet:
-                entidad_colisionada.remove_power_pellet()
-                self.score += 50
-                #jugador.is_powered_up = True
-        elif isinstance(entidad_colisionada, Enemigo):
-            if jugador.is_powered_up:
-                entidad_colisionada.kill()
-                self.score += 200
-            else:
-                jugador.lives -= 1
+        entidades_colisionadas = pygame.sprite.spritecollide(jugador, self.game_manager.entities, False)
+        for entidad_colisionada in entidades_colisionadas:
+            if isinstance(entidad_colisionada, Tile):
+                if entidad_colisionada.contains_pellet:
+                    entidad_colisionada.remove_pellet()
+                    self.score += 10
+                elif entidad_colisionada.contains_power_pellet:
+                    entidad_colisionada.remove_power_pellet()
+                    self.score += 50
+                    #jugador.is_powered_up = True
+            elif isinstance(entidad_colisionada, Enemigo):
+                if jugador.is_powered_up:
+                    entidad_colisionada.kill()
+                    self.score += 200
+                else:
+                    jugador.lives -= 1
 
     def check_pellets(self):
         for entidad in self.game_manager.entities:
             if isinstance(entidad, Tile):
                 if entidad.contains_pellet or entidad.contains_power_pellet:
                     return True
+
+
         return False
     
     def reiniciar(self):

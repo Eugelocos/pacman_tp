@@ -1,4 +1,4 @@
-
+import pygame
 
 
 
@@ -12,3 +12,14 @@ def es_pared_en_celda(centro_gxy, direccion_aplicar, escena):
     siguiente_celda=grilla.get_cell_by_position(siguiente_celda_pos, escena.game_manager.entities)
 
     return siguiente_celda and hasattr(siguiente_celda, "is_wall") and siguiente_celda.is_wall
+
+
+def es_target_en_celda(fantasma, target, escena):
+    grilla = escena.game_manager.grid_manager
+    celda_actual = grilla.world_to_grid(
+        (fantasma.rect.centerx, fantasma.rect.centery)
+    )
+
+    if celda_actual==target:
+        return True
+    return False

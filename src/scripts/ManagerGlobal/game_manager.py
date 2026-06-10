@@ -53,7 +53,6 @@ class GameManager():
             eventos = pygame.event.get()
         
         self.scenes.get(self.current_scene).update(delta_time, eventos)
-        pygame.display.update()
 
     def resetear_grilla(self):
         self.entities.empty()

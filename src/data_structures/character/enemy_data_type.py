@@ -16,6 +16,7 @@ class Enemigo(Personaje):
         self.target=target
         self.nombre_enemigo=nombre_enemigo
         self.jugador_ref=None
+        self.esta_en_casa=True
         if self.nombre_enemigo not in Enemigo.sprites_cache:
             self.cargar_frames()
 
