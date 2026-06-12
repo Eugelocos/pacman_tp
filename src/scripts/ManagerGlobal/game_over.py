@@ -1,5 +1,12 @@
 import pygame
+import os
+import sys
 import constantes as c
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from scripts.funciones_aux import dibujar_texto
+
+
+ruta_fuente = os.path.join("pacman_tp","assets", "fonts", "PressStart2P.ttf")
 
 class GameOver():
     def __init__(self, game_manager):
@@ -8,9 +15,8 @@ class GameOver():
         self.high_score=0 #luego hay que implementar la logica de lectura de archivo donde esta el high score real 
         self.texto=True
         self.tiempo=0
-        self.fuente_titulo = pygame.font.SysFont("Courier", 70)
-        self.fuente_normal = pygame.font.SysFont("Courier", 30)
-    
+        self.fuente_titulo = pygame.font.Font(ruta_fuente, 20)
+        self.fuente_normal = pygame.font.Font(ruta_fuente, 10)    
        
     def update(self,delta_time=0, eventos=None):
         for event in eventos:
@@ -26,26 +32,23 @@ class GameOver():
             self.texto=not self.texto
                                 
     def render(self):
+        ancho_actual, alto_actual = self.game_manager.ventana.get_size()
         self.game_manager.ventana.fill(c.COLOR_BG)
      
-        x = c.ANCHO_VENTANA // 2 - 150
-        y = c.ALTO_VENTANA // 2 
-        dibujar_texto("GAME OVER",self.game_manager.ventana,self.fuente_titulo, c.AMARILLO, x,y)
+        x = ancho_actual // 2
+        y = alto_actual *  3 // 16
+        dibujar_texto("GAME OVER",self.game_manager.ventana,self.fuente_titulo, c.AMARILLO, x,y,True)
         
-        x = c.ANCHO_VENTANA // 2 - 150
-        y = c.ALTO_VENTANA // 2 + 100
-        dibujar_texto("Presiona ENTER para reiniciar",self.game_manager.ventana,self.fuente_normal, c.BLANCO, x,y) 
+        x = ancho_actual // 2
+        y = alto_actual *  7 // 16
+        dibujar_texto("Presiona ENTER para reiniciar",self.game_manager.ventana,self.fuente_normal, c.BLANCO, x,y, True) 
         
-        x = c.ANCHO_VENTANA // 2 - 150
-        y = c.ALTO_VENTANA // 2 + 200
-        dibujar_texto("Presiona ESC para ir al menu",self.game_manager.ventana,self.fuente_normal, c.BLANCO, x,y)
+        x = ancho_actual // 2
+        y = alto_actual *  9 // 16
+        dibujar_texto("Presiona ESC para ir al menu",self.game_manager.ventana,self.fuente_normal, c.BLANCO, x,y, True)
 
 
-            
 
-def dibujar_texto(texto, ventana , fuente, color, x, y):
-    img=fuente.render(texto, True, color)
-    ventana.blit(img, (x, y))
         
         
     

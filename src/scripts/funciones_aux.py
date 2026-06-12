@@ -42,43 +42,50 @@ def dibujar_texto(texto, ventana, fuente, color, x, y, centrado=False):
 #dibujar fantasma
 def dibujar_fantasma(i,ventana,seleccionados, ruta_fuente):
     ancho_actual, alto_actual = ventana.get_size()
-    fuente= pygame.font.Font(ruta_fuente, 18)
-    fuente_pequeña= pygame.font.Font(ruta_fuente, 12)
+    fuente= pygame.font.Font(ruta_fuente, 7)
+    fuente_pequeña= pygame.font.Font(ruta_fuente, 6)
     fantasma = c.FANTASMAS[i]
 
-    espaciado_y = alto_actual * 2 // 16          # <<< MARGEN entre cartas
+    espaciado_y = alto_actual * 1.5 // 16          # <<< MARGEN entre cartas
 
-    ancho_carta = 430
+    ancho_carta = 200
     
     bloque_x = (ancho_actual - ancho_carta) // 2
 
     
     
-    x_circulo = bloque_x + 40
-    x_numero = bloque_x + 80
-    x_nombre = bloque_x + 120
+    x_circulo = bloque_x + 10
+    x_numero = bloque_x + 20
+    x_nombre = bloque_x + 40
     x_rectangulo = bloque_x
 
 
     y = alto_actual * 4 // 16 + i * espaciado_y  # <<< POSICION INICIAL de la primera carta 25% de alto_actual
 
-    pygame.draw.circle(ventana, fantasma[3], (x_circulo, y+20), 20, 0)
+    pygame.draw.circle(ventana, fantasma[3], (x_circulo, y+7), 5, 0)
     dibujar_texto(f"{i+1}", ventana,fuente,c.BLANCO,x_numero,y)
     dibujar_texto(f"{fantasma[1]}",ventana,fuente,fantasma[3],x_nombre,y)
-    dibujar_texto(f"{fantasma[2]}",ventana,fuente_pequeña,c.BLANCO,x_nombre,y+30)
+    dibujar_texto(f"{fantasma[2]}",ventana,fuente_pequeña,c.BLANCO,x_nombre,y+17)
     #dibujar rectangulo que indica que el fantasma se selecciono
     if fantasma in seleccionados:
-        pygame.draw.rect(ventana, c.BLANCO, (x_rectangulo, y-20, ancho_carta, alto_actual * 2 // 16),1)
+        pygame.draw.rect(ventana, c.BLANCO, (x_rectangulo, y, ancho_carta, alto_actual * 1.5 // 16),1)
         
 #seleccionar esquinas
 def dibujar_selec_esquinas(ventana,seleccionado,i,esquinas, ruta_fuente):
-    fuente= pygame.font.Font(ruta_fuente, 18)
-    fuente_pequeña= pygame.font.Font(ruta_fuente, 12)
-    x=100
-    y=20
+    ancho_actual, alto_actual = ventana.get_size()
+    fuente= pygame.font.Font(ruta_fuente, 10)
+    fuente_pequeña= pygame.font.Font(ruta_fuente, 7)
+
+    espaciado_y = alto_actual * 2 // 16          # <<< MARGEN entre cartas
+
+    ancho_carta = 150
+    
+    bloque_x = (ancho_actual - ancho_carta) // 2
+
+
     nombre=seleccionado[1]
     color=seleccionado[3]
-    dibujar_texto(f"Asigná una esquina a {nombre} ({i}/4):",ventana,fuente,color,x,y)
+    dibujar_texto(f"Asigná una esquina a {nombre} ({i}/4):", ventana, fuente, color, ancho_actual//2, espaciado_y * 1, True)
     opciones = [(0,0), (28,0), (0,31), (28,31)]
     nombres_esquinas = ["Superior izquierda", "Superior derecha", "Inferior izquierda", "Inferior derecha"]
     for n, (esquina, nombre_esquina) in enumerate(zip(opciones, nombres_esquinas), 1):
@@ -86,7 +93,8 @@ def dibujar_selec_esquinas(ventana,seleccionado,i,esquinas, ruta_fuente):
             color_numero = c.GRIS
         else:
             color_numero = c.BLANCO
-        dibujar_texto(f"{n}. {nombre_esquina}", ventana, fuente_pequeña, color_numero, x+150, y+50+(n*100))
+        y = alto_actual * 4 // 16 + n * espaciado_y
+        dibujar_texto(f"{n}. {nombre_esquina}", ventana, fuente_pequeña, color_numero, bloque_x, y)
     
         
     

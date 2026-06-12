@@ -1,5 +1,4 @@
 import pygame
-import os
 import constantes as c 
 import os
 import sys
@@ -30,9 +29,9 @@ class WelcomeScene():
                                 
     def render(self):
         ancho_actual, alto_actual = self.game_manager.ventana.get_size()
-        self.fuente_titulo = pygame.font.Font(ruta_fuente, 50)
-        self.fuente_normal = pygame.font.Font(ruta_fuente, 30)
-        margen=20
+        self.fuente_titulo = pygame.font.Font(ruta_fuente, 10)
+        self.fuente_normal = pygame.font.Font(ruta_fuente, 7)
+
         self.game_manager.ventana.fill(c.COLOR_BG)
         x = ancho_actual // 2
         y = alto_actual *  3 // 16
@@ -56,7 +55,7 @@ class SelectFantasmas():
     def __init__(self,game_manager):
         self.game_manager=game_manager
         self.seleccionados=[]
-        self.fuente_titulos=pygame.font.Font(ruta_fuente, 30)
+        self.fuente_titulos=pygame.font.Font(ruta_fuente, 7)
 
     def update(self,delta_time=0,eventos=None):
         for event in eventos:
@@ -99,9 +98,9 @@ class SelectEsquinas():
         self.game_manager=game_manager
         self.fantasmas=lista_fantasmas
         self.esquinas=[]
-        self.fuente_titulos=pygame.font.Font(ruta_fuente, 35)
-        self.fuente_subtitulos=pygame.font.Font(ruta_fuente, 20)
-        self.fuente_normal=pygame.font.Font(ruta_fuente, 10)
+        self.fuente_titulos=pygame.font.Font(ruta_fuente, 7)
+        self.fuente_subtitulos=pygame.font.Font(ruta_fuente, 3)
+        self.fuente_normal=pygame.font.Font(ruta_fuente, 5)
     
     def update(self,delta_time=0,eventos=None):
         sup_izq=(0,0)

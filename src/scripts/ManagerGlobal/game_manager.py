@@ -14,7 +14,10 @@ class GameManager():
     def __init__(self):
         self.entities = pygame.sprite.Group()
 
-        self.ventana = pygame.display.set_mode(
+        ANCHO_RETRO, ALTO_RETRO = 224, 288
+        self.ventana = pygame.Surface((ANCHO_RETRO, ALTO_RETRO))
+
+        self.ventana_real = pygame.display.set_mode(
             (c.ANCHO_VENTANA, c.ALTO_VENTANA), 
             pygame.RESIZABLE
         )
@@ -45,7 +48,20 @@ class GameManager():
             self.current_scene=new_scene
 
     def render(self):
+        ancho_actual, alto_actual = self.ventana_real.get_size()
         self.scenes.get(self.current_scene).render()
+
+        escala = min(ancho_actual / c.ANCHO_VENTANA, alto_actual / c.ALTO_VENTANA)
+        ancho_escalado = int(c.ANCHO_VENTANA * escala)
+        alto_escalado = int(c.ALTO_VENTANA * escala)
+
+        superficie_escalada = pygame.transform.scale(self.ventana, (ancho_escalado, alto_escalado))
+
+        pos_x = (ancho_actual - ancho_escalado) // 2
+        pos_y = (alto_actual - alto_escalado) // 2
+
+        self.ventana_real.fill((0, 0, 0)) 
+        self.ventana_real.blit(superficie_escalada, (pos_x, pos_y))
         pygame.display.flip()
     
     def update(self, delta_time=0, eventos=None):
