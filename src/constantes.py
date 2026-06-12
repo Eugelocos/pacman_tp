@@ -45,3 +45,19 @@ FANTASMAS = [
     ("fantasma_violeta", "Michae", "Violeta - El kamikaze.", VIOLETA),
 ]
 
+#SONIDOS Y RUTAS: 
+
+MUSICA = {
+    "welcome": "pacman_tp//assets//sonidos//inicio.mp3",
+    "select_fantasmas": "pacman_tp//assets//sonidos//menu_elegir_fantasmas.mp3",
+    "select_esquinas": "pacman_tp//assets//sonidos//menu_elegir_fantasmas.mp3",    
+}
+
+EFECTOS = {
+    "punto" : "pacman_tp//assets//sonidos//waka_waka.wav",
+    "power_pellet" : "pacman_tp//assets//sonidos//power_pellet.wav",
+    "mov_fantasmas" : "pacman_tp//assets//sonidos//sirena_fantasmas_1.wav",
+    "fantasma_comido" : "pacman_tp//assets//sonidos//pacman_come_fantasma.wav",
+    "ojos" : "pacman_tp//assets//sonidos//sirena_ojos.wav",
+    "vida_perdida" : "pacman_tp//assets//sonidos//vida_perdida.wav"
+}
