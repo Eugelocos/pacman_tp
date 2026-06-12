@@ -28,6 +28,10 @@ def crear_mapa(matriz, ventana, tipos_enemigos: list[tuple[str, tuple[int, int]]
             elif matriz[i][j]=="P":
                 jugador=Jugador((j*c.TAMAÑO_PARED+ c.TAMAÑO_PARED//2,i*c.TAMAÑO_PARED+ c.TAMAÑO_PARED//2), True, "pacman", "idle", c.TAMAÑO_PARED)
                 lista_personajes.append(jugador)
+            elif matriz[i][j]=="T":
+                transportador=Tile((j*c.TAMAÑO_PARED+ c.TAMAÑO_PARED//2,i*c.TAMAÑO_PARED+ c.TAMAÑO_PARED//2),True,"pacman_tp/assets/imagenes/items/pasillo.png",False, c.TAMAÑO_PARED)
+                lista_entidades.append(transportador)
+                transportador.is_tunnel = True
             elif matriz[i][j]=="G" and indice_enemigo < len(tipos_enemigos):
 
                 target_inicial=(tipos_enemigos[indice_enemigo][1][0]*c.TAMAÑO_PARED + c.TAMAÑO_PARED//2,tipos_enemigos[indice_enemigo][1][1]*c.TAMAÑO_PARED+ c.TAMAÑO_PARED//2)
@@ -36,7 +40,7 @@ def crear_mapa(matriz, ventana, tipos_enemigos: list[tuple[str, tuple[int, int]]
                 enemigo=Enemigo(pos,True,tipos_enemigos[indice_enemigo][0],c.TAMAÑO_PARED, "idle", pos_inicial=target_inicial, state="scatter")
                 lista_personajes.append(enemigo)
                 indice_enemigo+=1
-
+            
             else:
                 pared=Tile((j*c.TAMAÑO_PARED+ c.TAMAÑO_PARED//2,i*c.TAMAÑO_PARED+ c.TAMAÑO_PARED//2),True,"pacman_tp/assets/imagenes/items/pasillo.png",False, c.TAMAÑO_PARED)
                 lista_entidades.append(pared)

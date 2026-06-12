@@ -91,6 +91,14 @@ class GridManager:
         entidad=self.get_cell_by_position(self.grid_to_world(celda_futura),entities)     
         return entidad 
     
+    #funcion para "teletransportar" una entidad de tunel a tunel
+    def wrap_position(self, celda):
+        x, y = celda
+        if x < 0:
+            x = self.width - 1
+        elif x >= self.width:
+            x = 0
+        return (x, y)
         
         
         

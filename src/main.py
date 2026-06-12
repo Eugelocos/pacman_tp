@@ -6,7 +6,7 @@ sys.path.append(ruta_actual)
 import constantes as c
 from scripts.ManagerGlobal.game_manager import GameManager
 
-
+pygame.mixer.pre_init(44100, -16, 2, 512)
 pygame.init()
 
 # controlar FPS (framerate)

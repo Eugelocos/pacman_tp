@@ -30,8 +30,8 @@ class GameManager():
             "game": GameScene(self),
             "game_over": GameOver(self)
         }
-
-        self.current_scene = "welcome"
+        
+        self.change_scene("welcome")
         
 
     def add_entity(self, entity):
@@ -43,6 +43,11 @@ class GameManager():
     def change_scene(self, new_scene):
         if new_scene in self.scenes:
             self.current_scene=new_scene
+        if new_scene in c.MUSICA:
+            pygame.mixer.music.load(c.MUSICA[new_scene])
+            pygame.mixer.music.play(loops=-1)
+        elif new_scene not in c.MUSICA:
+            pygame.mixer.music.stop()
 
     def render(self):
         self.scenes.get(self.current_scene).render()

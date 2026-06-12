@@ -11,10 +11,13 @@ from scripts.Movimiento.movimiento import manejar_movimiento
 
 
 class GameScene():
+    muerte=None
     def __init__(self, game_manager):
         self.game_manager=game_manager
         self.jugador = self._jugador()
         self.score = 0
+        if GameScene.muerte is None:
+            GameScene.muerte=pygame.mixer.Sound(c.EFECTOS["vida_perdida"])  
         
     def _jugador(self):
         """Busca y devuelve el jugador dentro de las entidades del juego.
@@ -75,7 +78,9 @@ class GameScene():
                     entidad_colisionada.kill()
                     self.score += 200
                 else:
+                    GameScene.muerte.play()
                     jugador.lives -= 1
+                    
 
     def check_pellets(self):
         for entidad in self.game_manager.entities:
