@@ -8,18 +8,19 @@ from data_structures.character.enemy_data_type import Enemigo
 from data_structures.map.tile_data_type import Tile
 from data_structures.character.player_data_type import Jugador
 from scripts.Movimiento.movimiento import manejar_movimiento
+from scripts.ManagerGlobal.intermision import Intermision
+from scripts.ManagerGlobal.escena import EscenaBase
 
 
-class GameScene():
+class GameScene(EscenaBase):
     muerte=None
     def __init__(self, game_manager):
-        self.game_manager=game_manager
+        super().__init__(game_manager)
+
         self.jugador = self._jugador()
         self.score = 0
         if GameScene.muerte is None:
             GameScene.muerte=pygame.mixer.Sound(c.EFECTOS["vida_perdida"])  
-        self.power_up_timer=0
-        self.power_up_duration=6000 #6 segs
         
     def _jugador(self):
         """Busca y devuelve el jugador dentro de las entidades del juego.
@@ -37,23 +38,6 @@ class GameScene():
             eventos = pygame.event.get()
             
         
-        if self.jugador and self.jugador.is_powered_up:
-            self.power_up_timer += delta_time          
-            
-            if self.power_up_timer >= 4000 and self.power_up_timer < self.power_up_duration:
-                for entidad in self.game_manager.entities:
-                    if isinstance(entidad, Enemigo) and entidad.state == "asustado":
-                        entidad.state = "asustado_parpadeando" 
-            
-            if self.power_up_timer >= self.power_up_duration: 
-                self.jugador.is_powered_up = False     
-                self.jugador.velocidad = c.VELOCIDAD_BASE * 0.80
-                self.power_up_timer = 0                
-
-                for entidad in self.game_manager.entities:
-                    if isinstance(entidad, Enemigo) and (entidad.state == "asustado" or entidad.state == "asustado_parpadeando"):
-                        entidad.state = "scatter"  #los fantasmas vuelven a su patrón de movimiento normal
-                        entidad.velocidad = c.VELOCIDAD_BASE*0.75  #recuperan su velocidad
 
         self.game_manager.entities.update(self.game_manager.ventana, delta_time, self, eventos=eventos)
         self.manejar_colisiones()
@@ -64,7 +48,7 @@ class GameScene():
             self.game_manager.change_scene("game_over")
             return
         if not self.check_pellets():
-            self.reiniciar()
+            self.avanzar_nivel()
         
 
 
@@ -125,3 +109,22 @@ class GameScene():
         self.game_manager.resetear_grilla()
         self.jugador=self._jugador()
         pass
+
+    def avanzar_nivel(self):
+        self.reiniciar()
+        self.game_manager.nivel += 1
+        self.game_manager.rutina_manager.rutina =self.game_manager.rutina_manager.inicializar_rutinas()
+        print("rutinas", self.game_manager.rutina_manager.rutina)
+        self.game_manager.rutina_manager.reiniciar()
+        self.game_manager.scenes['intermision'] = Intermision(self.game_manager)
+        self.game_manager.change_scene("intermision")
+
+    def on_enter(self):
+        print("Entrango a Juego")
+        self.game_manager.rutina_manager.reanudar()
+        self.game_manager.pausado = False
+
+    def on_exit(self):
+        self.game_manager.rutina_manager.pausar()
+        self.game_manager.pausado = False
+    

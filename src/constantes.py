@@ -1,8 +1,8 @@
 #VENTANA
-ANCHO_VENTANA=466.667
-ALTO_VENTANA=600
-COLOR_BG=(0,0,20)
-TAMAÑO_PARED=(288//36)
+ANCHO_VENTANA = 476
+ALTO_VENTANA = 612
+COLOR_BG = (0,0,20)
+TAMAÑO_PARED = (612//36)
 MAPA_ANCHO = 28  # columnas
 MAPA_ALTO = 31   # filas
 
@@ -59,5 +59,8 @@ EFECTOS = {
     "mov_fantasmas" : "pacman_tp//assets//sonidos//sirena_fantasmas_1.wav",
     "fantasma_comido" : "pacman_tp//assets//sonidos//pacman_come_fantasma.wav",
     "ojos" : "pacman_tp//assets//sonidos//sirena_ojos.wav",
-    "vida_perdida" : "pacman_tp//assets//sonidos//vida_perdida.wav"
+    "vida_perdida" : "pacman_tp//assets//sonidos//vida_perdida.wav",
+    "click" : "pacman_tp//assets//sonidos//click.mp3",
+    "error" : "pacman_tp//assets//sonidos//error.mp3",
+    "jugar" : "pacman_tp//assets//sonidos//jugar.mp3"
 }

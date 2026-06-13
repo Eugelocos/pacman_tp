@@ -7,12 +7,7 @@ import constantes as c
 from scripts.Utils.utilidades_colision import es_pared_en_celda, es_target_en_celda
 
 def decidir_movimiento(jugador, fantasma, game_manager):
-    # Lógica para decidir la dirección del fantasma
-
-    # se llamaria a:
-    # self.cambiar_direccion(nueva_direccion)
-    # donde nueva_direccion es una de las siguientes: "arriba", "abajo", "izquierda", "derecha"
-    # la logica de decision dependera del tipo de fantasma ( self.nombre_enemigo ) y del estado del juego ( self.state )
+    
     grilla=game_manager.grid_manager
     escena=game_manager.scenes[game_manager.current_scene]
     centro = (fantasma.rect.centerx, fantasma.rect.centery)
@@ -42,18 +37,18 @@ def decidir_movimiento(jugador, fantasma, game_manager):
                 return direccion_opuesta
             
         target = decidir_target(jugador, fantasma, escena)
-
+        fantasma.target = target
         if es_target_en_celda(fantasma, target, escena):
-            print(f"🎯 {fantasma.nombre_enemigo} llegó a {target}")
             manejar_llegada_al_target(fantasma, escena)
         return decidir_direccion(fantasma, target, escena)
 
     return fantasma.direction
 
-def decidir_target(jugador, fantasma, escena):
-    target=None
+def decidir_target(jugador, fantasma, escena: object):
+    target = None
+    celda_jugador = escena.game_manager.grid_manager.world_to_grid((jugador.rect.centerx, jugador.rect.centery))
     if fantasma.esta_en_casa:
-        target=(13, 11)
+        target = (13, 11)
     else:
         if fantasma.state=="scatter":
             target=fantasma.pos_inicial
@@ -61,9 +56,10 @@ def decidir_target(jugador, fantasma, escena):
             if fantasma.nombre_enemigo=="fantasma_rojo":
                 target=escena.game_manager.grid_manager.world_to_grid((jugador.rect.centerx, jugador.rect.centery))
             else:
-                target=(13, 11)
-        elif fantasma.state=="muerto":
-            target=(13, 11)
+                target = (4,11)
+
+        elif fantasma.state =="muerto":
+            target = (13, 11)
             
 
     return target
