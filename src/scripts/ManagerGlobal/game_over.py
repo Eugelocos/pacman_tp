@@ -4,13 +4,15 @@ import sys
 import constantes as c
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from scripts.funciones_aux import dibujar_texto
+from scripts.ManagerGlobal.escena import EscenaBase
 
 
 ruta_fuente = os.path.join("pacman_tp","assets", "fonts", "PressStart2P.ttf")
 
-class GameOver():
+class GameOver(EscenaBase):
     def __init__(self, game_manager):
-        self.game_manager=game_manager
+        super().__init__(game_manager)
+
         self.milisegundos=c.PARPADEO
         self.high_score=0 #luego hay que implementar la logica de lectura de archivo donde esta el high score real 
         self.texto=True
@@ -47,6 +49,9 @@ class GameOver():
         y = alto_actual *  9 // 16
         dibujar_texto("Presiona ESC para ir al menu",self.game_manager.ventana,self.fuente_normal, c.BLANCO, x,y, True)
 
+    def on_exit(self):
+        self.game_manager.rutina_manager.reiniciar()
+    
 
 
         

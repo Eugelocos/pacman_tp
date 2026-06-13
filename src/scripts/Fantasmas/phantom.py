@@ -6,12 +6,7 @@ import constantes as c
 from scripts.Utils.utilidades_colision import es_pared_en_celda, es_target_en_celda
 
 def decidir_movimiento(jugador, fantasma, game_manager):
-    # Lógica para decidir la dirección del fantasma
-
-    # se llamaria a:
-    # self.cambiar_direccion(nueva_direccion)
-    # donde nueva_direccion es una de las siguientes: "arriba", "abajo", "izquierda", "derecha"
-    # la logica de decision dependera del tipo de fantasma ( self.nombre_enemigo ) y del estado del juego ( self.state )
+    
     grilla=game_manager.grid_manager
     escena=game_manager.scenes[game_manager.current_scene]
     centro = (fantasma.rect.centerx, fantasma.rect.centery)
@@ -25,30 +20,50 @@ def decidir_movimiento(jugador, fantasma, game_manager):
         abs(centro_celda[1] - centro[1]) <= 2
     )
 
-    if centrado:
+    if centrado and celda != fantasma.ultima_celda:
+        fantasma.ultima_celda = celda
         target = decidir_target(jugador, fantasma, escena)
-
+        fantasma.target = target
         if es_target_en_celda(fantasma, target, escena):
-            print(f"🎯 {fantasma.nombre_enemigo} llegó a {target}")
             manejar_llegada_al_target(fantasma, escena)
         return decidir_direccion(fantasma, target, escena)
 
     return fantasma.direction
 
-def decidir_target(jugador, fantasma, escena):
-    target=None
+def decidir_target(jugador, fantasma, escena: object):
+    target = None
+    celda_jugador = escena.game_manager.grid_manager.world_to_grid((jugador.rect.centerx, jugador.rect.centery))
     if fantasma.esta_en_casa:
-        target=(13, 11)
+        target = (13, 11)
     else:
-        if fantasma.state=="scatter":
-            target=fantasma.pos_inicial
-        elif fantasma.state=="chase":
-            if fantasma.name=="fantasma_rojo":
-                target=escena.game_manager.grid_manager.world_to_grid((jugador.rect.centerx, jugador.rect.centery))
+        if fantasma.state == "scatter":
+            target = fantasma.pos_inicial
+        elif fantasma.state =="chase":
+            if fantasma.nombre_enemigo == "fantasma_rojo":
+                target = celda_jugador
+            elif fantasma.nombre_enemigo == "fantasma_amarillo":
+                posicion_jugador = (jugador.rect.centerx, jugador.rect.centery)
+                posicion_fantasma = (fantasma.rect.centerx, fantasma.rect.centery)
+                distancia_a_jugador = round(distancia_euclideana(posicion_fantasma, posicion_jugador))
+
+                if distancia_a_jugador < 8 * c.TAMAÑO_PARED:
+                    target = fantasma.pos_inicial
+                elif distancia_a_jugador >= 8 * c.TAMAÑO_PARED:
+                    target = celda_jugador
+            elif fantasma.nombre_enemigo == "fantasma_cian":
+                target = (13, 11)
+                #se agrega luego
+            elif fantasma.nombre_enemigo == "fantasma_rosa":
+                direccion_jugador = jugador.direction
+                if direccion_jugador[1]==1:
+                    target = celda_jugador[0]+4*direccion_jugador[0]-4, celda_jugador[1]+4*direccion_jugador[1]
+                else:   
+                    target = celda_jugador[0]+4*direccion_jugador[0], celda_jugador[1]+4*direccion_jugador[1]
             else:
-                target=(13, 11)
-        elif fantasma.state=="muerto":
-            target=(13, 11)
+                target = (4,11)
+
+        elif fantasma.state =="muerto":
+            target = (13, 11)
             
 
     return target
@@ -63,9 +78,12 @@ def decidir_direccion(fantasma, target, escena):
     for direccion_posible in direccciones_posibles:
         target_pxy=escena.game_manager.grid_manager.grid_to_world((target[0], target[1]))
         centro_nuevo=(fantasma.rect.centerx + c.TAMAÑO_PARED*direccion_posible[0], fantasma.rect.centery + c.TAMAÑO_PARED*direccion_posible[1])
-        centro__nuevo_fantasma=pygame.Vector2(centro_nuevo)
-        centro_target=pygame.Vector2((target[0], target[1]))
-        distancia=centro__nuevo_fantasma.distance_to(centro_target)
+        distancia = distancia_euclideana(centro_nuevo, target_pxy)
+        celda_candidata = escena.game_manager.grid_manager.world_to_grid(centro_nuevo)
+
+
+        if 12 <= celda_candidata[1] <= 16 and 10 <= celda_candidata[0] <= 17:
+            distancia *= 999
 
         if distancia<candidato[1]:
             candidato=(direccion_posible, distancia)
@@ -79,3 +97,21 @@ def manejar_llegada_al_target(fantasma, escena):
         fantasma.esta_en_casa=False
     # else:
     #   otros tipos de casos
+
+def distancia_euclideana(pos_a: tuple[int, int], pos_b: tuple[int, int]) -> int|float:
+    """Obtiene la distancia euclideana entre A y B ((sqrt(pos_a[0]^2+pos_b[0]^2), sqrt(pos_a[1]^2+pos_b[1]^2))
+
+    Args:
+        pos_a (tuple[int, int]): Posicion de A en pixeles, no grilla
+        pos_b (tuple[int, int]): Posicion de B en pixeles, no grilla
+
+    Returns:
+        int|float: La distancia euclideana entre A y B
+    """
+    pos_a_vector=pygame.Vector2(pos_a)
+    pos_b_vector=pygame.Vector2(pos_b)
+    distancia=pos_a_vector.distance_to(pos_b_vector)
+
+    return distancia
+
+

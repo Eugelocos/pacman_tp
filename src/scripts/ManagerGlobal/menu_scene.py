@@ -5,22 +5,28 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from scripts.funciones_aux import dibujar_texto,dibujar_fantasma,dibujar_selec_esquinas
 from scripts.ManagerGlobal.game_scene import GameScene
+from scripts.ManagerGlobal.escena import EscenaBase
+
 
 ruta_fuente = os.path.join("pacman_tp","assets", "fonts", "PressStart2P.ttf")
 
-class WelcomeScene(): 
+class WelcomeScene(EscenaBase): 
+    click = None
     def __init__(self, game_manager):
-        self.game_manager=game_manager
+        super().__init__(game_manager)
         self.milisegundos=c.PARPADEO
-        self.high_score=0 #luego hay que implementar la logica de lectura de archivo donde esta el high score real 
         self.texto=True
         self.tiempo=0
+        if WelcomeScene.click is None:
+            WelcomeScene.click = pygame.mixer.Sound(c.EFECTOS["click"])  
+
 
        
     def update(self,delta_time=0, eventos=None):
         for event in eventos:
             if event.type==pygame.KEYDOWN:
                 if event.key==pygame.K_RETURN:
+                    WelcomeScene.click.play()
                     self.game_manager.change_scene("select_fantasmas")
         self.tiempo+=delta_time
         if self.tiempo>=self.milisegundos:
@@ -29,8 +35,8 @@ class WelcomeScene():
                                 
     def render(self):
         ancho_actual, alto_actual = self.game_manager.ventana.get_size()
-        self.fuente_titulo = pygame.font.Font(ruta_fuente, 10)
-        self.fuente_normal = pygame.font.Font(ruta_fuente, 7)
+        self.fuente_titulo = pygame.font.Font(ruta_fuente, 30)
+        self.fuente_normal = pygame.font.Font(ruta_fuente, 15)
 
         self.game_manager.ventana.fill(c.COLOR_BG)
         x = ancho_actual // 2
@@ -39,7 +45,7 @@ class WelcomeScene():
      
         x = ancho_actual // 2
         y = alto_actual *  4 // 16       
-        dibujar_texto(str(self.high_score),self.game_manager.ventana,self.fuente_normal, c.VERDE, x,y, True)
+        dibujar_texto(str(self.game_manager.high_score),self.game_manager.ventana,self.fuente_normal, c.VERDE, x,y, True)
 
         x = ancho_actual // 2
         y = alto_actual *  8 // 16        
@@ -49,13 +55,27 @@ class WelcomeScene():
             x = ancho_actual // 2
             y = alto_actual * 11 // 16            
             dibujar_texto("Presiona ENTER para jugar",self.game_manager.ventana,self.fuente_normal, c.BLANCO, x,y, True)
-            
-class SelectFantasmas():
 
+    def on_enter(self):
+        self.tiempo = 0
+        self.texto = True
+
+
+
+class SelectFantasmas(EscenaBase):
+    click = None
+    error = None
     def __init__(self,game_manager):
-        self.game_manager=game_manager
+        super().__init__(game_manager)
+        
         self.seleccionados=[]
-        self.fuente_titulos=pygame.font.Font(ruta_fuente, 7)
+        self.fuente_titulos=pygame.font.Font(ruta_fuente, 15)
+        
+        if SelectFantasmas.click is None:
+            SelectFantasmas.click = pygame.mixer.Sound(c.EFECTOS["click"])  
+
+        if SelectFantasmas.error is None:
+            SelectFantasmas.error = pygame.mixer.Sound(c.EFECTOS["error"])  
 
     def update(self,delta_time=0,eventos=None):
         for event in eventos:
@@ -79,9 +99,14 @@ class SelectFantasmas():
                             self.seleccionados.append(fantasma)
                     elif fantasma in self.seleccionados:
                         self.seleccionados.remove(fantasma)
-                if event.key==pygame.K_RETURN and len(self.seleccionados)==4:
-                    self.game_manager.scenes["select_esquinas"]=SelectEsquinas(self.game_manager,self.seleccionados)
-                    self.game_manager.change_scene("select_esquinas")
+                if event.key==pygame.K_RETURN:
+                    if len(self.seleccionados)==4:
+                        SelectFantasmas.click.play()
+                        self.game_manager.scenes["select_esquinas"]=SelectEsquinas(self.game_manager,self.seleccionados)
+                        self.game_manager.change_scene("select_esquinas")
+                    else:
+                        SelectFantasmas.error.play()
+
 
     def render(self):
         ancho_actual, alto_actual = self.game_manager.ventana.get_size()
@@ -93,14 +118,26 @@ class SelectFantasmas():
         for i in range(6):
             dibujar_fantasma(i,self.game_manager.ventana,self.seleccionados, ruta_fuente)
 
-class SelectEsquinas():
-    def __init__(self,game_manager, lista_fantasmas):    
+    def on_enter(self):
+        self.seleccionados=[]
+
+    def on_exit(self):
+        #reproducir mini efecto de sonido
+        pass
+
+class SelectEsquinas(EscenaBase):
+    efecto_jugar=None
+    def __init__(self,game_manager, lista_fantasmas): 
+        super().__init__(game_manager)   
         self.game_manager=game_manager
         self.fantasmas=lista_fantasmas
         self.esquinas=[]
-        self.fuente_titulos=pygame.font.Font(ruta_fuente, 7)
-        self.fuente_subtitulos=pygame.font.Font(ruta_fuente, 3)
-        self.fuente_normal=pygame.font.Font(ruta_fuente, 5)
+        self.fuente_titulos=pygame.font.Font(ruta_fuente, 20)
+        self.fuente_subtitulos=pygame.font.Font(ruta_fuente, 10)
+        self.fuente_normal=pygame.font.Font(ruta_fuente, 15)
+ 
+        if SelectEsquinas.efecto_jugar is None:
+            SelectEsquinas.efecto_jugar=pygame.mixer.Sound(c.EFECTOS["jugar"])  
     
     def update(self,delta_time=0,eventos=None):
         sup_izq=(0,0)
@@ -127,6 +164,7 @@ class SelectEsquinas():
                     
                     self.game_manager.actualizar_enemigos(lista_enemigos)
                     self.game_manager.scenes["game"] = GameScene(self.game_manager)
+                    self.game_manager.nivel=1
                     self.game_manager.change_scene("game")
         
     
@@ -136,7 +174,13 @@ class SelectEsquinas():
         f=len(self.esquinas)
         if f<4:
             dibujar_selec_esquinas(self.game_manager.ventana,self.fantasmas[f],len(self.esquinas)+1,self.esquinas, ruta_fuente)
-    
+
+    def on_enter(self):
+        self.esquinas=[]
+
+    def on_exit(self):
+        SelectEsquinas.efecto_jugar.play()
+        pass
         
     
     

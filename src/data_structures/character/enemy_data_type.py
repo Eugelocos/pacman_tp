@@ -17,6 +17,7 @@ class Enemigo(Personaje):
         self.nombre_enemigo=nombre_enemigo
         self.jugador_ref=None
         self.esta_en_casa=True
+        self.ultima_celda=None
         if self.nombre_enemigo not in Enemigo.sprites_cache:
             self.cargar_frames()
 
@@ -57,7 +58,7 @@ class Enemigo(Personaje):
         if not self.jugador_ref:
             self.jugador_ref = escena.jugador
 
-
+        self.state = escena.game_manager.rutina_manager.get_modo_actual().lower()
         self.proxima_direccion=decidir_movimiento(self.jugador_ref, self, escena.game_manager)
 
 

@@ -8,16 +8,20 @@ from data_structures.character.enemy_data_type import Enemigo
 from data_structures.map.tile_data_type import Tile
 from data_structures.character.player_data_type import Jugador
 from scripts.Movimiento.movimiento import manejar_movimiento
+from scripts.ManagerGlobal.intermision import Intermision
+from scripts.ManagerGlobal.escena import EscenaBase
 
 
-class GameScene():
+class GameScene(EscenaBase):
     muerte=None
     def __init__(self, game_manager):
-        self.game_manager=game_manager
+        super().__init__(game_manager)
+
         self.jugador = self._jugador()
         self.score = 0
         if GameScene.muerte is None:
             GameScene.muerte=pygame.mixer.Sound(c.EFECTOS["vida_perdida"])  
+
         
     def _jugador(self):
         """Busca y devuelve el jugador dentro de las entidades del juego.
@@ -35,7 +39,10 @@ class GameScene():
             eventos = pygame.event.get()
         
         
-
+        for evento in eventos:
+            if evento.type == pygame.KEYDOWN:
+                if evento.key==pygame.K_SPACE:
+                    self.avanzar_nivel()
         self.game_manager.entities.update(self.game_manager.ventana, delta_time, self, eventos=eventos)
         self.manejar_colisiones()
         
@@ -45,7 +52,7 @@ class GameScene():
             self.game_manager.change_scene("game_over")
             return
         if not self.check_pellets():
-            self.reiniciar()
+            self.avanzar_nivel()
         
 
 
@@ -95,3 +102,22 @@ class GameScene():
         self.game_manager.resetear_grilla()
         self.jugador=self._jugador()
         pass
+
+    def avanzar_nivel(self):
+        self.reiniciar()
+        self.game_manager.nivel += 1
+        self.game_manager.rutina_manager.rutina =self.game_manager.rutina_manager.inicializar_rutinas()
+        print("rutinas", self.game_manager.rutina_manager.rutina)
+        self.game_manager.rutina_manager.reiniciar()
+        self.game_manager.scenes['intermision'] = Intermision(self.game_manager)
+        self.game_manager.change_scene("intermision")
+
+    def on_enter(self):
+        print("Entrango a Juego")
+        self.game_manager.rutina_manager.reanudar()
+        self.game_manager.pausado = False
+
+    def on_exit(self):
+        self.game_manager.rutina_manager.pausar()
+        self.game_manager.pausado = False
+    
