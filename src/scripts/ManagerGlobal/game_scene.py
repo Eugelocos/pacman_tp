@@ -107,11 +107,13 @@ class GameScene(EscenaBase):
                                 entidad.direction = (entidad.direction[0] * -1, entidad.direction[1] * -1) #invertir direccion
                                 entidad.proxima_direccion = entidad.direction
             elif isinstance(entidad_colisionada, Enemigo):
-                if jugador.is_powered_up and entidad_colisionada.state=="asustado":
+                estados_susto=["asustado", "asustado_parpadeando"]
+                estados=["asustado", "asustado_parpadeando","muerto"]
+                if jugador.is_powered_up and (entidad_colisionada.state in estados_susto):
                     entidad_colisionada.state="muerto"
                     entidad_colisionada.velocidad=c.VELOCIDAD_BASE*1.5
                     self.score += 200
-                elif entidad_colisionada.state != "muerto" and entidad_colisionada.state != "asustado":
+                elif entidad_colisionada.state not in estados:
                     GameScene.muerte.play()
                     jugador.lives -= 1
                     

@@ -11,8 +11,18 @@ def manejar_movimiento(entidad, escena, delta_time=1):
     centro_gxy = grilla.world_to_grid((centro_x, centro_y))
     centro_celda_gxy = grilla.grid_to_world(centro_gxy)
     
-
-    velocidad=round(entidad.velocidad * delta_time / 1000)
+    celda_actual = (centro_gxy[0], centro_gxy[1]) 
+    pos_actual = grilla.grid_to_world(celda_actual)
+    celda_objeto = grilla.get_cell_by_position(pos_actual, escena.game_manager.entities)
+    es_tunel = celda_objeto and hasattr(celda_objeto,"is_tunnel") and celda_objeto.is_tunnel
+    
+    if es_tunel and not entidad.es_jugador:
+        # Si es túnel y es un fantasma, va al 40% de la VELOCIDAD_BASE
+        velocidad_base_tunel = c.VELOCIDAD_BASE * 0.40
+        velocidad = round(velocidad_base_tunel * delta_time / 1000)
+    else:
+        # Si es el jugador o están fuera del túnel, usan su velocidad normal
+        velocidad = round(entidad.velocidad * delta_time / 1000)
 
     direccion_aplicar=entidad.direction
 

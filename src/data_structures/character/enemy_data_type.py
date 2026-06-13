@@ -10,6 +10,8 @@ from scripts.Fantasmas.phantom import decidir_movimiento
 class Enemigo(Personaje):
     sprites_cache={}
     sprite_asustado=None
+    sprite_blanco=None
+    sprite_ojos=None
     def __init__(self, position, visibility, nombre_enemigo, tile_size, direction="derecha", state='scatter', pos_inicial=(0,0), target=(0,0)):
         ruta_inicial = f"pacman_tp/assets/imagenes/characters/enemies/{nombre_enemigo}/horizontal/{nombre_enemigo}_0.png"
         super().__init__(position, visibility, direction, tile_size, ruta_inicial, False)
@@ -25,7 +27,19 @@ class Enemigo(Personaje):
             self.cargar_frames()
         if Enemigo.sprite_asustado is None:
             Enemigo.sprite_asustado = pygame.transform.scale(cargar_con_transparencia("pacman_tp//assets//imagenes//characters//enemies//fantasma_asustado//fantasma_asustado_0.png"), (self.tile_size, self.tile_size))
-
+        if Enemigo.sprite_blanco is None:
+            Enemigo.sprite_blanco= pygame.transform.scale(cargar_con_transparencia("pacman_tp//assets//imagenes//characters//enemies//fantasma_asustado//fantasma_asustado_1.png"), (self.tile_size, self.tile_size))
+        if Enemigo.sprite_ojos is None: 
+            ruta_ojos_vert="pacman_tp//assets//imagenes//characters//enemies//ojos_fantasmas//ojos_vertical.png"
+            ruta_ojos_hor="pacman_tp//assets//imagenes//characters//enemies//ojos_fantasmas//ojos_horizontal.png"
+            ojos_arriba=pygame.transform.scale(cargar_con_transparencia(ruta_ojos_vert), (self.tile_size, self.tile_size))
+            ojos_derecha=pygame.transform.scale(cargar_con_transparencia(ruta_ojos_hor), (self.tile_size, self.tile_size))
+            ojos_abajo=pygame.transform.flip(ojos_arriba,False,True)
+            ojos_izquierda=pygame.transform.flip(ojos_derecha,True,False)
+            Enemigo.sprite_ojos={"arriba":ojos_arriba,
+                                 "abajo":ojos_abajo,
+                                 "derecha":ojos_derecha,
+                                 "izquierda":ojos_izquierda}         
 
     def cargar_frames(self):
         for direccion in ["arriba", "abajo", "derecha", "izquierda"]:
@@ -47,6 +61,19 @@ class Enemigo(Personaje):
 
 
     def cambiar_sprite_por_direccion(self):
+        if self.state=="muerto":
+            if self.direction[0]==0 and self.direction[1]==-1:
+                self.frames=[Enemigo.sprite_ojos["arriba"]]
+            elif self.direction[0]==0 and self.direction[1]==1:
+                self.frames=[Enemigo.sprite_ojos["abajo"]]
+            elif self.direction[0]==1 and self.direction[1]==0:
+                self.frames=[Enemigo.sprite_ojos["derecha"]]
+            elif self.direction[0]==-1 and self.direction[1]==0:
+                self.frames=[Enemigo.sprite_ojos["izquierda"]]    
+            self.frame_actual = 0
+            self.image = self.frames[self.frame_actual]
+            return
+        
         if self.direction[0]==0 and self.direction[1]==-1:
             self.frames=Enemigo.sprites_cache[self.nombre_enemigo]["arriba"]
         elif self.direction[0]==0 and self.direction[1]==1:
@@ -55,13 +82,20 @@ class Enemigo(Personaje):
             self.frames=Enemigo.sprites_cache[self.nombre_enemigo]["derecha"]
         elif self.direction[0]==-1 and self.direction[1]==0:
             self.frames=Enemigo.sprites_cache[self.nombre_enemigo]["izquierda"]
-
+            
         self.frame_actual=0
         self.image=self.frames[self.frame_actual]
 
     def actualizar_animacion(self, delta_time):
+        
         if self.state=="asustado":
             self.image=Enemigo.sprite_asustado
+        elif self.state=="asustado_parpadeando":
+            tiempo=pygame.time.get_ticks()
+            if (tiempo//250) % 2 == 0:
+                self.image = Enemigo.sprite_asustado  # Azul
+            else:
+                self.image = Enemigo.sprite_blanco    # Blanco
         else:
             super().actualizar_animacion(delta_time)
 

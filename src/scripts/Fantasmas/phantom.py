@@ -48,7 +48,7 @@ def decidir_target(jugador, fantasma, escena: object):
     target = None
     celda_jugador = escena.game_manager.grid_manager.world_to_grid((jugador.rect.centerx, jugador.rect.centery))
     if fantasma.state =="muerto":
-        target = (15, 11)
+        target = (13, 14)
     elif fantasma.esta_en_casa:
         target = (13, 11)
     else:
