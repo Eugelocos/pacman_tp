@@ -25,7 +25,8 @@ class GameManager():
             pygame.RESIZABLE
         )
         
-        self.high_score=0 #luego hay que implementar la logica de lectura de archivo donde esta el high score real 
+        self.high_score=0 #luego hay que implementar la logica de lectura de archivo donde esta el high score real
+        self.score=0 
         self.nivel=0
         self.tipos_enemigos=[] # [("fantasma_... ,  (esquina)"), ... ]
         self.grid_manager = GridManager(matriz_mapa)

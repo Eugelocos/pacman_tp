@@ -50,7 +50,9 @@ FANTASMAS = [
 MUSICA = {
     "welcome": "pacman_tp//assets//sonidos//inicio.mp3",
     "select_fantasmas": "pacman_tp//assets//sonidos//menu_elegir_fantasmas.mp3",
-    "select_esquinas": "pacman_tp//assets//sonidos//menu_elegir_fantasmas.mp3",    
+    "select_esquinas": "pacman_tp//assets//sonidos//menu_elegir_fantasmas.mp3",   
+    "intermision": "pacman_tp//assets//sonidos//menu_elegir_fantasmas.mp3",
+    
 }
 
 EFECTOS = {

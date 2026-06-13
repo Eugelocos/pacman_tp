@@ -18,7 +18,7 @@ class GameScene(EscenaBase):
         super().__init__(game_manager)
 
         self.jugador = self._jugador()
-        self.score = 0
+        self.game_manager.score = 0
         if GameScene.muerte is None:
             GameScene.muerte=pygame.mixer.Sound(c.EFECTOS["vida_perdida"])  
         self.power_up_timer=0
@@ -91,10 +91,10 @@ class GameScene(EscenaBase):
             if isinstance(entidad_colisionada, Tile):
                 if entidad_colisionada.contains_pellet:
                     entidad_colisionada.remove_pellet()
-                    self.score += 10
+                    self.game_manager.score += 10
                 elif entidad_colisionada.contains_power_pellet:
                     entidad_colisionada.remove_power_pellet()
-                    self.score += 50
+                    self.game_manager.score += 50
                     jugador.is_powered_up = True
                     jugador.velocidad=c.VELOCIDAD_BASE*0.90
                     self.power_up_timer=0
@@ -112,7 +112,7 @@ class GameScene(EscenaBase):
                 if jugador.is_powered_up and (entidad_colisionada.state in estados_susto):
                     entidad_colisionada.state="muerto"
                     entidad_colisionada.velocidad=c.VELOCIDAD_BASE*1.5
-                    self.score += 200
+                    self.game_manager.score += 200
                 elif entidad_colisionada.state not in estados:
                     GameScene.muerte.play()
                     jugador.lives -= 1
