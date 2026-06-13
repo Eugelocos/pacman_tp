@@ -18,6 +18,8 @@ class GameScene():
         self.score = 0
         if GameScene.muerte is None:
             GameScene.muerte=pygame.mixer.Sound(c.EFECTOS["vida_perdida"])  
+        self.power_up_timer=0
+        self.power_up_duration=6000 #6 segs
         
     def _jugador(self):
         """Busca y devuelve el jugador dentro de las entidades del juego.
@@ -33,8 +35,25 @@ class GameScene():
     def update(self, delta_time=0, eventos=None):
         if eventos is None:
             eventos = pygame.event.get()
+            
         
-        
+        if self.jugador and self.jugador.is_powered_up:
+            self.power_up_timer += delta_time          
+            
+            if self.power_up_timer >= 4000 and self.power_up_timer < self.power_up_duration:
+                for entidad in self.game_manager.entities:
+                    if isinstance(entidad, Enemigo) and entidad.state == "asustado":
+                        entidad.state = "asustado_parpadeando" 
+            
+            if self.power_up_timer >= self.power_up_duration: 
+                self.jugador.is_powered_up = False     
+                self.jugador.velocidad = c.VELOCIDAD_BASE * 0.80
+                self.power_up_timer = 0                
+
+                for entidad in self.game_manager.entities:
+                    if isinstance(entidad, Enemigo) and (entidad.state == "asustado" or entidad.state == "asustado_parpadeando"):
+                        entidad.state = "scatter"  #los fantasmas vuelven a su patrón de movimiento normal
+                        entidad.velocidad = c.VELOCIDAD_BASE*0.75  #recuperan su velocidad
 
         self.game_manager.entities.update(self.game_manager.ventana, delta_time, self, eventos=eventos)
         self.manejar_colisiones()
@@ -72,12 +91,23 @@ class GameScene():
                 elif entidad_colisionada.contains_power_pellet:
                     entidad_colisionada.remove_power_pellet()
                     self.score += 50
-                    #jugador.is_powered_up = True
+                    jugador.is_powered_up = True
+                    jugador.velocidad=c.VELOCIDAD_BASE*0.90
+                    self.power_up_timer=0
+                    
+                    for entidad in self.game_manager.entities:
+                        if isinstance(entidad,Enemigo):
+                            if entidad.state != "muerto" and not entidad.esta_en_casa:
+                                entidad.state = "asustado"
+                                entidad.velocidad = c.VELOCIDAD_BASE * 0.5  # Velocidad a la mitad
+                                entidad.direction = (entidad.direction[0] * -1, entidad.direction[1] * -1) #invertir direccion
+                                entidad.proxima_direccion = entidad.direction
             elif isinstance(entidad_colisionada, Enemigo):
-                if jugador.is_powered_up:
-                    entidad_colisionada.kill()
+                if jugador.is_powered_up and entidad_colisionada.state=="asustado":
+                    entidad_colisionada.state="muerto"
+                    entidad_colisionada.velocidad=c.VELOCIDAD_BASE*1.5
                     self.score += 200
-                else:
+                elif entidad_colisionada.state != "muerto" and entidad_colisionada.state != "asustado":
                     GameScene.muerte.play()
                     jugador.lives -= 1
                     

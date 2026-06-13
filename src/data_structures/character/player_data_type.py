@@ -1,6 +1,7 @@
 import pygame
 import sys
 import os
+import constantes as c
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from data_structures.character.character_data_type import Personaje
 
@@ -9,6 +10,7 @@ class Jugador(Personaje):
     def __init__(self, position, visibility, nombre_jugador, direction, tile_size, lives=3):
         ruta_inicial = f"pacman_tp/assets/imagenes/characters/{nombre_jugador}/horizontal/{nombre_jugador}_0.png"
         super().__init__(position, visibility, direction, tile_size, ruta_inicial, True)
+        self.velocidad = c.VELOCIDAD_BASE * 0.80
         self.lives=lives
         self.point=0
         self.nombre=nombre_jugador

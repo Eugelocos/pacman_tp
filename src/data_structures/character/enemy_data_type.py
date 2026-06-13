@@ -1,6 +1,7 @@
 import pygame
 import os
 import sys
+import constantes as c 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from data_structures.character.character_data_type import Personaje
 from scripts.Fantasmas.phantom import decidir_movimiento
@@ -11,6 +12,7 @@ class Enemigo(Personaje):
     def __init__(self, position, visibility, nombre_enemigo, tile_size, direction="derecha", state='scatter', pos_inicial=(0,0), target=(0,0)):
         ruta_inicial = f"pacman_tp/assets/imagenes/characters/enemies/{nombre_enemigo}/horizontal/{nombre_enemigo}_0.png"
         super().__init__(position, visibility, direction, tile_size, ruta_inicial, False)
+        self.velocidad = c.VELOCIDAD_BASE * 0.75
         self.state=state
         self.pos_inicial=pos_inicial
         self.target=target
