@@ -48,6 +48,7 @@ class GameScene(EscenaBase):
         
         if self.jugador.lives <= 0:    
             self.game_manager.resetear_grilla()
+            self.game_manager.nivel=0
             self.game_manager.scenes["game"] = GameScene(self.game_manager)
             self.game_manager.change_scene("game_over")
             return
