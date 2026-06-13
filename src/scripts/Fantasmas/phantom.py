@@ -21,7 +21,9 @@ def decidir_movimiento(jugador, fantasma, game_manager):
         abs(centro_celda[1] - centro[1]) <= 2
     )
 
-    if centrado:
+    if centrado  and celda != fantasma.ultima_celda:
+
+        fantasma.ultima_celda = celda
         posibles_estados=["asustado","asustado_parpadeando"]
         if fantasma.state in posibles_estados:
             direcciones_totales = [(0,-1), (0,1), (-1,0), (1,0)]
