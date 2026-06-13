@@ -35,7 +35,7 @@ class WelcomeScene(EscenaBase):
                                 
     def render(self):
         ancho_actual, alto_actual = self.game_manager.ventana.get_size()
-        self.fuente_titulo = pygame.font.Font(ruta_fuente, 30)
+        self.fuente_titulo = pygame.font.Font(ruta_fuente, 48)
         self.fuente_normal = pygame.font.Font(ruta_fuente, 15)
 
         self.game_manager.ventana.fill(c.COLOR_BG)

@@ -17,8 +17,8 @@ class GameOver(EscenaBase):
         self.high_score=0 #luego hay que implementar la logica de lectura de archivo donde esta el high score real 
         self.texto=True
         self.tiempo=0
-        self.fuente_titulo = pygame.font.Font(ruta_fuente, 20)
-        self.fuente_normal = pygame.font.Font(ruta_fuente, 10)    
+        self.fuente_titulo = pygame.font.Font(ruta_fuente, 48)
+        self.fuente_normal = pygame.font.Font(ruta_fuente, 15)    
        
     def update(self,delta_time=0, eventos=None):
         for event in eventos:
@@ -35,18 +35,18 @@ class GameOver(EscenaBase):
                                 
     def render(self):
         ancho_actual, alto_actual = self.game_manager.ventana.get_size()
-        self.game_manager.ventana.fill(c.COLOR_BG)
+        self.game_manager.ventana.fill((0,0,0))
      
         x = ancho_actual // 2
-        y = alto_actual *  3 // 16
+        y = alto_actual *  5 // 16
         dibujar_texto("GAME OVER",self.game_manager.ventana,self.fuente_titulo, c.AMARILLO, x,y,True)
         
         x = ancho_actual // 2
-        y = alto_actual *  7 // 16
+        y = alto_actual *  10 // 16
         dibujar_texto("Presiona ENTER para reiniciar",self.game_manager.ventana,self.fuente_normal, c.BLANCO, x,y, True) 
         
         x = ancho_actual // 2
-        y = alto_actual *  9 // 16
+        y = alto_actual *  12 // 16
         dibujar_texto("Presiona ESC para ir al menu",self.game_manager.ventana,self.fuente_normal, c.BLANCO, x,y, True)
 
     def on_exit(self):
