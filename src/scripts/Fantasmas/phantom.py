@@ -130,3 +130,18 @@ def obtener_fantasma_por_tipo(escena, tipo_buscado):
             return entity
     return None
     
+def distancia_euclideana(pos_a: tuple[int, int], pos_b: tuple[int, int]) -> int|float:
+    """Obtiene la distancia euclideana entre A y B ((sqrt(pos_a[0]^2+pos_b[0]^2), sqrt(pos_a[1]^2+pos_b[1]^2))
+
+    Args:
+        pos_a (tuple[int, int]): Posicion de A en pixeles, no grilla
+        pos_b (tuple[int, int]): Posicion de B en pixeles, no grilla
+
+    Returns:
+        int|float: La distancia euclideana entre A y B
+    """
+    pos_a_vector=pygame.Vector2(pos_a)
+    pos_b_vector=pygame.Vector2(pos_b)
+    distancia=pos_a_vector.distance_to(pos_b_vector)
+
+    return distancia
