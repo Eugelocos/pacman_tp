@@ -9,6 +9,7 @@ from scripts.Fantasmas.phantom import decidir_movimiento
 
 class Enemigo(Personaje):
     sprites_cache={}
+    sprite_asustado=None
     def __init__(self, position, visibility, nombre_enemigo, tile_size, direction="derecha", state='scatter', pos_inicial=(0,0), target=(0,0)):
         ruta_inicial = f"pacman_tp/assets/imagenes/characters/enemies/{nombre_enemigo}/horizontal/{nombre_enemigo}_0.png"
         super().__init__(position, visibility, direction, tile_size, ruta_inicial, False)
@@ -22,6 +23,8 @@ class Enemigo(Personaje):
         self.ultima_celda=None
         if self.nombre_enemigo not in Enemigo.sprites_cache:
             self.cargar_frames()
+        if Enemigo.sprite_asustado is None:
+            Enemigo.sprite_asustado = pygame.transform.scale(cargar_con_transparencia("pacman_tp//assets//imagenes//characters//enemies//fantasma_asustado//fantasma_asustado_0.png"), (self.tile_size, self.tile_size))
 
 
     def cargar_frames(self):
@@ -56,11 +59,19 @@ class Enemigo(Personaje):
         self.frame_actual=0
         self.image=self.frames[self.frame_actual]
 
+    def actualizar_animacion(self, delta_time):
+        if self.state=="asustado":
+            self.image=Enemigo.sprite_asustado
+        else:
+            super().actualizar_animacion(delta_time)
+
     def update(self, pantalla, delta_time, escena, eventos=None):
         if not self.jugador_ref:
             self.jugador_ref = escena.jugador
 
-        self.state = escena.game_manager.rutina_manager.get_modo_actual().lower()
+        estados_validos=["asustado", "asustado_parpadeando", "muerto"]
+        if self.state not in estados_validos:
+            self.state = escena.game_manager.rutina_manager.get_modo_actual().lower()
         self.proxima_direccion=decidir_movimiento(self.jugador_ref, self, escena.game_manager)
 
 

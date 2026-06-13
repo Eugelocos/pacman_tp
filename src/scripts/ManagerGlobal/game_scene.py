@@ -21,6 +21,8 @@ class GameScene(EscenaBase):
         self.score = 0
         if GameScene.muerte is None:
             GameScene.muerte=pygame.mixer.Sound(c.EFECTOS["vida_perdida"])  
+        self.power_up_timer=0
+        self.power_up_duration=6000 #6 segs
         
     def _jugador(self):
         """Busca y devuelve el jugador dentro de las entidades del juego.
@@ -37,7 +39,24 @@ class GameScene(EscenaBase):
         if eventos is None:
             eventos = pygame.event.get()
             
-        
+        if self.jugador and self.jugador.is_powered_up:
+            self.power_up_timer += delta_time          
+            
+            if self.power_up_timer >= 4000 and self.power_up_timer < self.power_up_duration:
+                for entidad in self.game_manager.entities:
+                    if isinstance(entidad, Enemigo) and entidad.state == "asustado":
+                        entidad.state = "asustado_parpadeando" 
+            
+            if self.power_up_timer >= self.power_up_duration: 
+                self.jugador.is_powered_up = False     
+                self.jugador.velocidad = c.VELOCIDAD_BASE * 0.80
+                self.power_up_timer = 0                
+
+                for entidad in self.game_manager.entities:
+                    if isinstance(entidad, Enemigo) and (entidad.state == "asustado" or entidad.state == "asustado_parpadeando"):
+                        entidad.state = "scatter"  #los fantasmas vuelven a su patrón de movimiento normal
+                        entidad.velocidad = c.VELOCIDAD_BASE*0.75  #recuperan su velocidad
+
 
         self.game_manager.entities.update(self.game_manager.ventana, delta_time, self, eventos=eventos)
         self.manejar_colisiones()
