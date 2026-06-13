@@ -21,7 +21,6 @@ class GameScene(EscenaBase):
         self.score = 0
         if GameScene.muerte is None:
             GameScene.muerte=pygame.mixer.Sound(c.EFECTOS["vida_perdida"])  
-
         
     def _jugador(self):
         """Busca y devuelve el jugador dentro de las entidades del juego.
@@ -37,12 +36,9 @@ class GameScene(EscenaBase):
     def update(self, delta_time=0, eventos=None):
         if eventos is None:
             eventos = pygame.event.get()
+            
         
-        
-        for evento in eventos:
-            if evento.type == pygame.KEYDOWN:
-                if evento.key==pygame.K_SPACE:
-                    self.avanzar_nivel()
+
         self.game_manager.entities.update(self.game_manager.ventana, delta_time, self, eventos=eventos)
         self.manejar_colisiones()
         
@@ -80,12 +76,23 @@ class GameScene(EscenaBase):
                 elif entidad_colisionada.contains_power_pellet:
                     entidad_colisionada.remove_power_pellet()
                     self.score += 50
-                    #jugador.is_powered_up = True
+                    jugador.is_powered_up = True
+                    jugador.velocidad=c.VELOCIDAD_BASE*0.90
+                    self.power_up_timer=0
+                    
+                    for entidad in self.game_manager.entities:
+                        if isinstance(entidad,Enemigo):
+                            if entidad.state != "muerto" and not entidad.esta_en_casa:
+                                entidad.state = "asustado"
+                                entidad.velocidad = c.VELOCIDAD_BASE * 0.5  # Velocidad a la mitad
+                                entidad.direction = (entidad.direction[0] * -1, entidad.direction[1] * -1) #invertir direccion
+                                entidad.proxima_direccion = entidad.direction
             elif isinstance(entidad_colisionada, Enemigo):
-                if jugador.is_powered_up:
-                    entidad_colisionada.kill()
+                if jugador.is_powered_up and entidad_colisionada.state=="asustado":
+                    entidad_colisionada.state="muerto"
+                    entidad_colisionada.velocidad=c.VELOCIDAD_BASE*1.5
                     self.score += 200
-                else:
+                elif entidad_colisionada.state != "muerto" and entidad_colisionada.state != "asustado":
                     GameScene.muerte.play()
                     jugador.lives -= 1
                     

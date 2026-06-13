@@ -21,8 +21,21 @@ def decidir_movimiento(jugador, fantasma, game_manager):
         abs(centro_celda[1] - centro[1]) <= 2
     )
 
-    if centrado and celda != fantasma.ultima_celda:
-        fantasma.ultima_celda = celda
+    if centrado:
+        posibles_estados=["asustado","asustado_parpadeando"]
+        if fantasma.state in posibles_estados:
+            direcciones_totales = [(0,-1), (0,1), (-1,0), (1,0)]
+            direccion_opuesta = (fantasma.direction[0] * -1, fantasma.direction[1] * -1)
+            direcciones_posibles=[]
+            for d in direcciones_totales:
+                if d!=direccion_opuesta and not es_pared_en_celda(celda,d,escena):
+                    direcciones_posibles.append(d)
+                    
+            if direcciones_posibles:
+                return random.choice(direcciones_posibles)
+            else:
+                return direccion_opuesta
+            
         target = decidir_target(jugador, fantasma, escena)
         fantasma.target = target
         if es_target_en_celda(fantasma, target, escena):
@@ -106,27 +119,14 @@ def decidir_direccion(fantasma, target, escena):
 def manejar_llegada_al_target(fantasma, escena):
     if fantasma.esta_en_casa:
         fantasma.esta_en_casa=False
-    # else:
-    #   otros tipos de casos
-
-def distancia_euclideana(pos_a: tuple[int, int], pos_b: tuple[int, int]) -> int|float:
-    """Obtiene la distancia euclideana entre A y B ((sqrt(pos_a[0]^2+pos_b[0]^2), sqrt(pos_a[1]^2+pos_b[1]^2))
-
-    Args:
-        pos_a (tuple[int, int]): Posicion de A en pixeles, no grilla
-        pos_b (tuple[int, int]): Posicion de B en pixeles, no grilla
-
-    Returns:
-        int|float: La distancia euclideana entre A y B
-    """
-    pos_a_vector=pygame.Vector2(pos_a)
-    pos_b_vector=pygame.Vector2(pos_b)
-    distancia=pos_a_vector.distance_to(pos_b_vector)
-
-    return distancia
-
+    elif fantasma.state=="muerto":
+        fantasma.state="scatter"
+        fantasma.velocidad=c.VELOCIDAD_BASE*0.75
+        fantasma.esta_en_casa=True
+        
 def obtener_fantasma_por_tipo(escena, tipo_buscado):
     for entity in escena.game_manager.entities:
         if hasattr(entity, 'nombre_enemigo') and entity.nombre_enemigo == tipo_buscado:
             return entity
     return None
+    
