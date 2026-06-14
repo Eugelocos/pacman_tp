@@ -93,6 +93,11 @@ class GameScene(EscenaBase):
         if eventos is None:
             eventos = pygame.event.get()
 
+        for event in eventos:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    self.avanzar_nivel()
+
         if self.estado_muerto:
             self.muerte_timer -= delta_time
             if self.circulo_creciendo:
@@ -114,7 +119,7 @@ class GameScene(EscenaBase):
                 self.estado_muerto = False
                 if self.jugador.lives <= 0:
                     self.game_manager.resetear_grilla()
-                    self.game_manager.nivel = 0
+                    self.game_manager.nivel = 1
                     self.game_manager.scenes["game"] = GameScene(self.game_manager)
                     self.game_manager.change_scene("game_over")
                     return
@@ -125,7 +130,7 @@ class GameScene(EscenaBase):
 
         if self.jugador.lives <= 0:
             self.game_manager.resetear_grilla()
-            self.game_manager.nivel = 0
+            self.game_manager.nivel = 1
             self.game_manager.scenes["game"] = GameScene(self.game_manager)
             self.game_manager.change_scene("game_over")
             return
