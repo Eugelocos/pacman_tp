@@ -94,7 +94,7 @@ def dibujar_selec_esquinas(ventana,seleccionado,i,esquinas, ruta_fuente):
         else:
             color_numero = c.BLANCO
         y = alto_actual * 4 // 16 + n * espaciado_y
-        dibujar_texto(f"{n}. {nombre_esquina}", ventana, fuente_pequeña, color_numero, bloque_x, y)
+        dibujar_texto(f"{n}. {nombre_esquina}", ventana, fuente_pequeña, color_numero, bloque_x-30, y-30)
     
         
     
