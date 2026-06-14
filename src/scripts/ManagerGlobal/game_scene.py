@@ -40,7 +40,8 @@ class GameScene(EscenaBase):
         if GameScene.waka_waka is None:
             GameScene.waka_waka = pygame.mixer.Sound(c.EFECTOS["punto"])
         
-        
+        self.ultimo_waka = 0
+        self.intervalo_waka = 150 
         self.estado_sirena_actual = None
             
         
@@ -56,11 +57,6 @@ class GameScene(EscenaBase):
         self.fuente_data = pygame.font.Font(ruta_fuente, 15)
         
     def _jugador(self):
-        """Busca y devuelve el jugador dentro de las entidades del juego.
-    
-        Returns:
-            Jugador: la instancia jugador, si existe, o None si no se encontró.
-        """
         for entity in self.game_manager.entities:
             if isinstance(entity, Jugador):
                 return entity
@@ -133,8 +129,6 @@ class GameScene(EscenaBase):
         if not self.check_pellets():
             self.avanzar_nivel()
         
-
-
 
     def render(self):
         ventana = self.game_manager.ventana
@@ -212,8 +206,6 @@ class GameScene(EscenaBase):
             )
         
 
-        pass
-
     def manejar_colisiones(self):
         jugador = self.jugador
         if jugador is None:
@@ -225,6 +217,11 @@ class GameScene(EscenaBase):
                 if entidad_colisionada.contains_pellet:
                     entidad_colisionada.remove_pellet()
                     self.game_manager.score += 10
+                    tiempo_actual = pygame.time.get_ticks()
+                    if tiempo_actual - self.ultimo_waka >= self.intervalo_waka:
+                        GameScene.waka_waka.play()
+                        self.ultimo_waka = tiempo_actual
+                        
                 elif entidad_colisionada.contains_power_pellet:
                     entidad_colisionada.remove_power_pellet()
                     self.game_manager.score += 50
@@ -235,15 +232,11 @@ class GameScene(EscenaBase):
                     for entidad in self.game_manager.entities:
                         if isinstance(entidad,Enemigo):
                             if entidad.state != "muerto" and not entidad.esta_en_casa:
-
-
                                 entidad.state = "asustado"
                                 entidad.velocidad = c.VELOCIDAD_BASE * 0.5
 
                                 centro_x, centro_y = entidad.rect.centerx, entidad.rect.centery
                                 centro_gxy = self.game_manager.grid_manager.world_to_grid((centro_x, centro_y))
-                                centro_celda_gxy = self.game_manager.grid_manager.grid_to_world(centro_gxy)
-
                                 
                                 direccion_invertida = (-entidad.direction[0], -entidad.direction[1])
                                 if not es_pared_en_celda(centro_gxy, direccion_invertida, self):
@@ -263,10 +256,10 @@ class GameScene(EscenaBase):
                                 centro_celda = self.game_manager.grid_manager.grid_to_world(centro_gxy)
                                 entidad.rect.center = centro_celda
 
-
             elif isinstance(entidad_colisionada, Enemigo):
                 estados_susto=["asustado", "asustado_parpadeando"]
-                estados=["asustado", "asustado_parpadeando","muerto"]
+                estados=["asustado", "asustado_parpadeando","muerto", "explotando"]
+                
                 if jugador.is_powered_up and (entidad_colisionada.state in estados_susto):
                     entidad_colisionada.state="muerto"
                     entidad_colisionada.cambiar_sprite_por_direccion()
@@ -294,26 +287,21 @@ class GameScene(EscenaBase):
             if isinstance(entidad, Tile):
                 if entidad.contains_pellet or entidad.contains_power_pellet:
                     return True
-
-
         return False
     
     def reiniciar(self):
         self.game_manager.resetear_grilla()
         self.jugador=self._jugador()
-        pass
 
     def avanzar_nivel(self):
         self.reiniciar()
         self.game_manager.nivel += 1
         self.game_manager.rutina_manager.rutina =self.game_manager.rutina_manager.inicializar_rutinas()
-        print("rutinas", self.game_manager.rutina_manager.rutina)
         self.game_manager.rutina_manager.reiniciar()
         self.game_manager.scenes['intermision'] = Intermision(self.game_manager)
         self.game_manager.change_scene("intermision")
 
     def on_enter(self):
-        print("Entrango a Juego")
         self.game_manager.rutina_manager.reanudar()
         self.game_manager.pausado = False
 

@@ -89,15 +89,14 @@ class Enemigo(Personaje):
         self.image=self.frames[self.frame_actual]
 
     def actualizar_animacion(self, delta_time):
-        
         if self.state=="asustado":
             self.image=Enemigo.sprite_asustado
         elif self.state=="asustado_parpadeando":
             tiempo=pygame.time.get_ticks()
             if (tiempo//250) % 2 == 0:
-                self.image = Enemigo.sprite_asustado  # Azul
+                self.image = Enemigo.sprite_asustado  
             else:
-                self.image = Enemigo.sprite_blanco    # Blanco
+                self.image = Enemigo.sprite_blanco    
         else:
             super().actualizar_animacion(delta_time)
 
@@ -110,18 +109,18 @@ class Enemigo(Personaje):
             self.state = escena.game_manager.rutina_manager.get_modo_actual().lower()
             
         if self.state == "explotando":
+            if not hasattr(self, "tiempo_inicio_explosion"):
+                self.tiempo_inicio_explosion = pygame.time.get_ticks()
+            
             tiempo_actual = pygame.time.get_ticks()
-            if tiempo_actual - getattr(self, "tiempo_inicio_explosion", tiempo_actual) >= 3000:
+            if tiempo_actual - self.tiempo_inicio_explosion >= 3000:
                 self.detonar(escena)
-            pass
         else:
             self.proxima_direccion=decidir_movimiento(self.jugador_ref, self, escena.game_manager)
-
 
         super().update(pantalla, delta_time, escena, eventos)
 
     def detonar(self, escena):
-
         centro_explosion = (self.rect.centerx, self.rect.centery)
         radio_explosion = 5 * c.TAMAÑO_PARED 
 
@@ -130,34 +129,37 @@ class Enemigo(Personaje):
                 continue
 
             centro_entidad = (entity.rect.centerx, entity.rect.centery)
-            
             distancia = math.hypot(centro_entidad[0] - centro_explosion[0], centro_entidad[1] - centro_explosion[1])
 
             if distancia <= radio_explosion:
-                
-                if hasattr(entity, 'es_jugador') and entity.es_jugador:
-                    entity.lives -= 1
-                    if hasattr(escena, 'muerte') and escena.muerte:
-                         escena.muerte.play()
-                
+                if entity == escena.jugador:
+                    escena.muerte.play()
+                    escena.sirena_normal.stop()
+                    escena.sirena_power.stop()
+                    escena.sirena_ojos.stop()
+                    entity.lives -= 1 
                 elif hasattr(entity, 'nombre_enemigo'):
                     entity.state = "muerto"
                     entity.velocidad = c.VELOCIDAD_BASE * 1.5               
                     entity.cambiar_sprite_por_direccion()                   
                     if hasattr(entity, 'destino_kamikaze'):
                         del entity.destino_kamikaze
+
         animacion = AnimacionExplosion(centro_explosion[0], centro_explosion[1], radio_explosion)
-        
         escena.game_manager.entities.add(animacion)
-        self.state = "muerto"
-        self.velocidad = c.VELOCIDAD_BASE * 1.5                             
-        self.cambiar_sprite_por_direccion()                                 
-        if hasattr(self, 'destino_kamikaze'):
-            del self.destino_kamikaze
         
+        self.state = "muerto"
+        self.velocidad = c.VELOCIDAD_BASE * 1.5                                                         
+        self.cambiar_sprite_por_direccion()                                                             
+        
+        # Limpieza de timers y targets
+        if hasattr(self, 'destino_kamikaze'):
+            del self.destino_kamikaze   
+        if hasattr(self, 'tiempo_inicio_explosion'):
+            del self.tiempo_inicio_explosion
 
 
 def cargar_con_transparencia(ruta):
     img = pygame.image.load(ruta).convert()  
     img.set_colorkey((0, 0, 0))             
-    return img.convert_alpha()  
+    return img.convert_alpha()
