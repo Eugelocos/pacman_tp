@@ -42,7 +42,7 @@ FANTASMAS = [
     ("fantasma_cian", "Inky", "Celeste - El flanqueador.", CIAN),
     ("fantasma_amarillo", "Clyde", "Naranja - El tímido.", NARANJA),
     ("fantasma_verde", "Artola", "Verde - El traidor.", VERDE),
-    ("fantasma_violeta", "Michae", "Violeta - El kamikaze.", VIOLETA),
+    ("fantasma_violeta", "Artur", "Violeta - El kamikaze.", VIOLETA),
 ]
 
 #SONIDOS Y RUTAS: 
@@ -52,6 +52,7 @@ MUSICA = {
     "select_fantasmas": "pacman_tp//assets//sonidos//menu_elegir_fantasmas.mp3",
     "select_esquinas": "pacman_tp//assets//sonidos//menu_elegir_fantasmas.mp3",   
     "intermision": "pacman_tp//assets//sonidos//menu_elegir_fantasmas.mp3",
+    "game_over":"pacman_tp//assets//sonidos//game_over.mp3"
     
 }
 

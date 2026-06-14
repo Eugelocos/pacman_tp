@@ -51,6 +51,26 @@ def decidir_target(jugador, fantasma, escena: object):
         target = (13, 14)
     elif fantasma.esta_en_casa:
         target = (13, 11)
+    elif fantasma.nombre_enemigo=="fantasma_violeta":
+                # 1. Chequeamos si todavía no eligió a dónde ir a explotar
+                if not hasattr(fantasma, 'destino_kamikaze'):
+                    # Traemos la lista directamente del game_manager que acabamos de arreglar
+                    celdas_validas = escena.game_manager.celdas_pasillo
+                    
+                    # Filtramos las celdas que caen adentro de la casa de los fantasmas para que no explote ahí
+                    celdas_seguras = []
+                    for celda in celdas_validas:
+                        if not (12 <= celda[1] <= 16 and 10 <= celda[0] <= 17):
+                            celdas_seguras.append(celda)
+                    
+                    # Elegimos una celda al azar
+                    if celdas_seguras:
+                        fantasma.destino_kamikaze = random.choice(celdas_seguras)
+                    else:
+                        fantasma.destino_kamikaze = celda_jugador # Plan B por si algo falla
+
+                # 2. Le asignamos el target definitivo
+                target = fantasma.destino_kamikaze
     else:
         if fantasma.state == "scatter":
             target = fantasma.pos_inicial
@@ -87,6 +107,30 @@ def decidir_target(jugador, fantasma, escena: object):
                     target = celda_jugador[0]+4*direccion_jugador[0]-4, celda_jugador[1]+4*direccion_jugador[1]
                 else:   
                     target = celda_jugador[0]+4*direccion_jugador[0], celda_jugador[1]+4*direccion_jugador[1]
+            elif fantasma.nombre_enemigo=="fantasma_verde":
+                tiempo_actual = pygame.time.get_ticks()
+                
+                if not hasattr(fantasma, 'victima') or not hasattr(fantasma, 'tiempo_cambio_victima') or (tiempo_actual - fantasma.tiempo_cambio_victima > 8000):
+                                        
+                    fantasmas_disponibles=[]
+                    for entity in escena.game_manager.entities:
+                        if hasattr(entity, 'nombre_enemigo') and entity != fantasma:
+                            fantasmas_disponibles.append(entity)
+                        
+                    if fantasmas_disponibles:
+                        fantasma.victima = random.choice(fantasmas_disponibles)
+                        fantasma.tiempo_cambio_victima = tiempo_actual  
+                    else:
+                        fantasma.victima = None
+
+                if hasattr(fantasma, 'victima') and fantasma.victima is not None:
+                    centro_victima = (fantasma.victima.rect.centerx, fantasma.victima.rect.centery)
+                    target = escena.game_manager.grid_manager.world_to_grid(centro_victima)
+                else:
+                    target = celda_jugador
+            
+                
+                
             else:
                 target = (4,11) # un target por defecto, no deberia pasar nunca que llegue aca
     return target
@@ -123,6 +167,12 @@ def manejar_llegada_al_target(fantasma, escena):
         fantasma.state="scatter"
         fantasma.velocidad=c.VELOCIDAD_BASE*0.75
         fantasma.esta_en_casa=True
+    elif fantasma.nombre_enemigo == "fantasma_violeta" and fantasma.state != "explotando":
+        # Frenamos al fantasma
+        fantasma.velocidad = 0
+        fantasma.state = "explotando"
+        # Guardamos en qué milisegundo empezó a explotar para la Fase 3
+        fantasma.tiempo_inicio_explosion = pygame.time.get_ticks()
         
 def obtener_fantasma_por_tipo(escena, tipo_buscado):
     for entity in escena.game_manager.entities:

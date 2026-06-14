@@ -19,6 +19,8 @@ class GameOver(EscenaBase):
         self.tiempo=0
         self.fuente_titulo = pygame.font.Font(ruta_fuente, 48)
         self.fuente_normal = pygame.font.Font(ruta_fuente, 15)    
+        self.musica_game_over = pygame.mixer.music.load(c.MUSICA["game_over"])
+        pygame.mixer.music.play(-1)
        
     def update(self,delta_time=0, eventos=None):
         for event in eventos:
@@ -51,6 +53,7 @@ class GameOver(EscenaBase):
 
     def on_exit(self):
         self.game_manager.rutina_manager.reiniciar()
+        pygame.mixer.music.stop()
     
 
 
