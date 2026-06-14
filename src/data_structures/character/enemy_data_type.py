@@ -17,7 +17,7 @@ class Enemigo(Personaje):
     def __init__(self, position, visibility, nombre_enemigo, tile_size, direction="derecha", state='scatter', pos_inicial=(0,0), target=(0,0)):
         ruta_inicial = f"pacman_tp/assets/imagenes/characters/enemies/{nombre_enemigo}/horizontal/{nombre_enemigo}_0.png"
         super().__init__(position, visibility, direction, tile_size, ruta_inicial, False)
-        self.velocidad = c.VELOCIDAD_BASE * 0.75
+        self.velocidad = c.VELOCIDAD_BASE * 0.75 * c.MULTIPLICADOR_VELOCIDAD_ENEMIGOS[nombre_enemigo]
         self.state=state
         self.pos_inicial=pos_inicial
         self.target=target

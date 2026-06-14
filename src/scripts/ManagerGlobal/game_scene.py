@@ -11,6 +11,7 @@ from scripts.Movimiento.movimiento import manejar_movimiento
 from scripts.ManagerGlobal.intermision import Intermision
 from scripts.ManagerGlobal.escena import EscenaBase
 from scripts.funciones_aux import dibujar_texto
+from scripts.Utils.utilidades_colision import es_pared_en_celda
 
 
 class GameScene(EscenaBase):
@@ -170,10 +171,35 @@ class GameScene(EscenaBase):
                     for entidad in self.game_manager.entities:
                         if isinstance(entidad,Enemigo):
                             if entidad.state != "muerto" and not entidad.esta_en_casa:
+
+
                                 entidad.state = "asustado"
                                 entidad.velocidad = c.VELOCIDAD_BASE * 0.5
-                                entidad.direction = (entidad.direction[0] * -1, entidad.direction[1] * -1) #invertir direccion
-                                entidad.proxima_direccion = entidad.direction
+
+                                centro_x, centro_y = entidad.rect.centerx, entidad.rect.centery
+                                centro_gxy = self.game_manager.grid_manager.world_to_grid((centro_x, centro_y))
+                                centro_celda_gxy = self.game_manager.grid_manager.grid_to_world(centro_gxy)
+
+                                
+                                direccion_invertida = (-entidad.direction[0], -entidad.direction[1])
+                                if not es_pared_en_celda(centro_gxy, direccion_invertida, self):
+                                    entidad.proxima_direccion = direccion_invertida
+                                    entidad.direction = direccion_invertida
+                                else:
+                                    direcciones = [(1,0), (-1,0), (0,1), (0,-1)]
+                                    for nueva_dir in direcciones:
+                                        if nueva_dir == entidad.direction or nueva_dir == direccion_invertida:
+                                            continue
+                                        if not es_pared_en_celda(centro_gxy, nueva_dir, self):
+                                            entidad.proxima_direccion = nueva_dir
+                                            entidad.direction = nueva_dir
+                                            break
+                                entidad.cambiar_sprite_por_direccion()
+
+                                centro_celda = self.game_manager.grid_manager.grid_to_world(centro_gxy)
+                                entidad.rect.center = centro_celda
+
+
             elif isinstance(entidad_colisionada, Enemigo):
                 estados_susto=["asustado", "asustado_parpadeando"]
                 estados=["asustado", "asustado_parpadeando","muerto"]

@@ -67,3 +67,12 @@ EFECTOS = {
     "error" : "pacman_tp//assets//sonidos//error.mp3",
     "jugar" : "pacman_tp//assets//sonidos//jugar.mp3"
 }
+
+MULTIPLICADOR_VELOCIDAD_ENEMIGOS = {
+    "fantasma_rojo": 1.0,
+    "fantasma_rosa": 1.0,
+    "fantasma_cian": 1.0,
+    "fantasma_amarillo": 1.0,
+    "fantasma_verde": 1.5,
+    "fantasma_violeta": 1.0
+}
