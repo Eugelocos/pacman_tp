@@ -31,8 +31,8 @@ class GameManager():
         self.tipos_enemigos=[] # [("fantasma_... ,  (esquina)"), ... ]
         self.grid_manager = GridManager(matriz_mapa)
         self.rutina_manager=RutinaManager(self)
-
-        for entity in self.grid_manager.grid:
+        entidades_creadas, self.celdas_pasillo = self.grid_manager.grid
+        for entity in entidades_creadas:
             self.add_entity(entity)
 
         self.scenes = {
@@ -97,8 +97,8 @@ class GameManager():
         self.entities.empty()
 
         self.grid_manager = GridManager(matriz_mapa, tipos_enemigos=self.tipos_enemigos)
-
-        for entity in self.grid_manager.grid:
+        entidades_creadas, self.celdas_pasillo = self.grid_manager.grid
+        for entity in entidades_creadas:
             self.add_entity(entity)
 
     def actualizar_enemigos(self, nuevos_enemigos):

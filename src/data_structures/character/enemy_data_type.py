@@ -1,9 +1,11 @@
 import pygame
 import os
 import sys
+import math
 import constantes as c 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from data_structures.character.character_data_type import Personaje
+from scripts.Utils.visual import AnimacionExplosion
 from scripts.Fantasmas.phantom import decidir_movimiento
 
 
@@ -103,16 +105,56 @@ class Enemigo(Personaje):
         if not self.jugador_ref:
             self.jugador_ref = escena.jugador
 
-        estados_validos=["asustado", "asustado_parpadeando", "muerto"]
+        estados_validos=["asustado", "asustado_parpadeando", "muerto","explotando"]
         if self.state not in estados_validos:
             self.state = escena.game_manager.rutina_manager.get_modo_actual().lower()
-        self.proxima_direccion=decidir_movimiento(self.jugador_ref, self, escena.game_manager)
+            
+        if self.state == "explotando":
+            tiempo_actual = pygame.time.get_ticks()
+            if tiempo_actual - getattr(self, "tiempo_inicio_explosion", tiempo_actual) >= 3000:
+                self.detonar(escena)
+            pass
+        else:
+            self.proxima_direccion=decidir_movimiento(self.jugador_ref, self, escena.game_manager)
 
 
         super().update(pantalla, delta_time, escena, eventos)
 
-    
+    def detonar(self, escena):
 
+        centro_explosion = (self.rect.centerx, self.rect.centery)
+        radio_explosion = 5 * c.TAMAÑO_PARED 
+
+        for entity in escena.game_manager.entities:
+            if entity == self:
+                continue
+
+            centro_entidad = (entity.rect.centerx, entity.rect.centery)
+            
+            distancia = math.hypot(centro_entidad[0] - centro_explosion[0], centro_entidad[1] - centro_explosion[1])
+
+            if distancia <= radio_explosion:
+                
+                if hasattr(entity, 'es_jugador') and entity.es_jugador:
+                    entity.lives -= 1
+                    if hasattr(escena, 'muerte') and escena.muerte:
+                         escena.muerte.play()
+                
+                elif hasattr(entity, 'nombre_enemigo'):
+                    entity.state = "muerto"
+                    entity.velocidad = c.VELOCIDAD_BASE * 1.5               
+                    entity.cambiar_sprite_por_direccion()                   
+                    if hasattr(entity, 'destino_kamikaze'):
+                        del entity.destino_kamikaze
+        animacion = AnimacionExplosion(centro_explosion[0], centro_explosion[1], radio_explosion)
+        
+        escena.game_manager.entities.add(animacion)
+        self.state = "muerto"
+        self.velocidad = c.VELOCIDAD_BASE * 1.5                             
+        self.cambiar_sprite_por_direccion()                                 
+        if hasattr(self, 'destino_kamikaze'):
+            del self.destino_kamikaze
+        
 
 
 def cargar_con_transparencia(ruta):

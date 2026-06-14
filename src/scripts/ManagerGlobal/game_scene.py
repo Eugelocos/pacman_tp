@@ -10,10 +10,17 @@ from data_structures.character.player_data_type import Jugador
 from scripts.Movimiento.movimiento import manejar_movimiento
 from scripts.ManagerGlobal.intermision import Intermision
 from scripts.ManagerGlobal.escena import EscenaBase
+from scripts.funciones_aux import dibujar_texto
 
 
 class GameScene(EscenaBase):
     muerte=None
+    comer_fantasma=None
+    sirena_normal=None
+    sirena_power=None
+    sirena_ojos=None
+    waka_waka=None
+    
     def __init__(self, game_manager):
         super().__init__(game_manager)
 
@@ -21,8 +28,27 @@ class GameScene(EscenaBase):
         self.game_manager.score = 0
         if GameScene.muerte is None:
             GameScene.muerte=pygame.mixer.Sound(c.EFECTOS["vida_perdida"])  
+        if GameScene.comer_fantasma is None:
+            GameScene.comer_fantasma=pygame.mixer.Sound(c.EFECTOS["fantasma_comido"])  
+        if GameScene.sirena_normal is None:
+            GameScene.sirena_normal = pygame.mixer.Sound(c.EFECTOS["mov_fantasmas"])
+        if GameScene.sirena_power is None:
+            GameScene.sirena_power = pygame.mixer.Sound(c.EFECTOS["power_pellet"])
+        if GameScene.sirena_ojos is None:
+            GameScene.sirena_ojos = pygame.mixer.Sound(c.EFECTOS["ojos"])
+        if GameScene.waka_waka is None:
+            GameScene.waka_waka = pygame.mixer.Sound(c.EFECTOS["punto"])
+        
+        
+        self.estado_sirena_actual = None
+            
+        
         self.power_up_timer=0
-        self.power_up_duration=6000 #6 segs
+        self.power_up_duration=6000 # 6 segs
+        self.fantasmas_comidos_racha = 0 
+        self.textos_puntajes = []
+        ruta_fuente = os.path.join("pacman_tp","assets", "fonts", "PressStart2P.ttf")
+        self.fuente_puntajes = pygame.font.Font(ruta_fuente, 8)
         
     def _jugador(self):
         """Busca y devuelve el jugador dentro de las entidades del juego.
@@ -39,6 +65,37 @@ class GameScene(EscenaBase):
         if eventos is None:
             eventos = pygame.event.get()
             
+        hay_ojos_activos = False 
+        for entidad in self.game_manager.entities:
+            if isinstance(entidad, Enemigo) and entidad.state == "muerto":
+                hay_ojos_activos = True 
+                break
+        nuevo_estado_sirena = "normal"
+        if hay_ojos_activos:
+            nuevo_estado_sirena = "ojos"
+        elif self.jugador and self.jugador.is_powered_up:
+            nuevo_estado_sirena = "power"
+        
+        if nuevo_estado_sirena != self.estado_sirena_actual:
+            GameScene.sirena_normal.stop()
+            GameScene.sirena_power.stop()
+            GameScene.sirena_ojos.stop()
+        
+            if nuevo_estado_sirena == "ojos":
+                GameScene.sirena_ojos.play(loops=-1)
+            elif nuevo_estado_sirena == "power":
+                GameScene.sirena_power.play(loops=-1)
+            elif nuevo_estado_sirena == "normal":
+                GameScene.sirena_normal.play(loops=-1)
+        
+            self.estado_sirena_actual = nuevo_estado_sirena
+        
+        for texto in self.textos_puntajes[:]: 
+            texto[3] -= delta_time 
+            texto[2] -= 0.03 * delta_time
+            if texto[3] <= 0:
+                self.textos_puntajes.remove(texto)
+            
         if self.jugador and self.jugador.is_powered_up:
             self.power_up_timer += delta_time          
             
@@ -51,11 +108,12 @@ class GameScene(EscenaBase):
                 self.jugador.is_powered_up = False     
                 self.jugador.velocidad = c.VELOCIDAD_BASE * 0.80
                 self.power_up_timer = 0                
+                self.fantasmas_comidos_racha = 0
 
                 for entidad in self.game_manager.entities:
                     if isinstance(entidad, Enemigo) and (entidad.state == "asustado" or entidad.state == "asustado_parpadeando"):
-                        entidad.state = "scatter"  #los fantasmas vuelven a su patrón de movimiento normal
-                        entidad.velocidad = c.VELOCIDAD_BASE*0.75  #recuperan su velocidad
+                        entidad.state = "scatter"
+                        entidad.velocidad = c.VELOCIDAD_BASE*0.75
 
 
         self.game_manager.entities.update(self.game_manager.ventana, delta_time, self, eventos=eventos)
@@ -78,6 +136,16 @@ class GameScene(EscenaBase):
 
         for entity in self.game_manager.entities:
             entity.draw(self.game_manager.ventana)
+        for texto in self.textos_puntajes:
+            dibujar_texto(
+                texto=texto[0],
+                ventana=self.game_manager.ventana,
+                fuente=self.fuente_puntajes,
+                color=(0, 255, 255),
+                x=texto[1],
+                y=texto[2],
+                centrado=True
+            )
 
         pass
 
@@ -103,7 +171,7 @@ class GameScene(EscenaBase):
                         if isinstance(entidad,Enemigo):
                             if entidad.state != "muerto" and not entidad.esta_en_casa:
                                 entidad.state = "asustado"
-                                entidad.velocidad = c.VELOCIDAD_BASE * 0.5  # Velocidad a la mitad
+                                entidad.velocidad = c.VELOCIDAD_BASE * 0.5
                                 entidad.direction = (entidad.direction[0] * -1, entidad.direction[1] * -1) #invertir direccion
                                 entidad.proxima_direccion = entidad.direction
             elif isinstance(entidad_colisionada, Enemigo):
@@ -111,10 +179,24 @@ class GameScene(EscenaBase):
                 estados=["asustado", "asustado_parpadeando","muerto"]
                 if jugador.is_powered_up and (entidad_colisionada.state in estados_susto):
                     entidad_colisionada.state="muerto"
+                    entidad_colisionada.cambiar_sprite_por_direccion()
+                    if GameScene.comer_fantasma is not None:
+                        GameScene.comer_fantasma.play()
                     entidad_colisionada.velocidad=c.VELOCIDAD_BASE*1.5
-                    self.game_manager.score += 200
+                    puntos_ganados = 200 * (2 ** self.fantasmas_comidos_racha)
+                    self.game_manager.score += puntos_ganados
+                    self.fantasmas_comidos_racha += 1
+                    self.textos_puntajes.append([
+                        str(puntos_ganados), 
+                        entidad_colisionada.rect.centerx, 
+                        entidad_colisionada.rect.centery, 
+                        1000
+                    ])
                 elif entidad_colisionada.state not in estados:
                     GameScene.muerte.play()
+                    GameScene.sirena_normal.stop()
+                    GameScene.sirena_power.stop()
+                    GameScene.sirena_ojos.stop()
                     jugador.lives -= 1
                     
 
