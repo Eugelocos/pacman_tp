@@ -18,6 +18,7 @@ class Personaje(Entity):
         self.frame_timer = 0
         self.frame_delay = 40
         self.es_jugador = es_jugador
+        self.pos_aparicion = position
 
 
     def cambiar_direccion(self, new_dir):

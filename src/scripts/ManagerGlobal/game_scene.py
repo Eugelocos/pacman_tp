@@ -61,14 +61,25 @@ class GameScene(EscenaBase):
         self.canal_waka = pygame.mixer.Channel(0)   
         self.frames_congelados = 0
         self.estado_sirena_actual = None
+            
         
         self.power_up_timer=0
-        self.power_up_duration=6000 #6 segs
+        self.power_up_duration=6000 # 6 segs
+
+
+        self.muerte_timer = 1500
+        self.estado_muerto = False
+
         self.fantasmas_comidos_racha = 0 
         self.textos_puntajes = []
+        ruta=f"pacman_tp/assets/imagenes/characters/pacman/horizontal/pacman_1.png"
+        self.imagen_vida = pygame.transform.scale(pygame.image.load(ruta).convert_alpha(), (c.TAMAÑO_PARED, c.TAMAÑO_PARED))
         ruta_fuente = os.path.join("pacman_tp","assets", "fonts", "PressStart2P.ttf")
-        self.fuente_puntajes = pygame.font.Font(ruta_fuente, 8) 
-        
+        self.fuente_puntajes = pygame.font.Font(ruta_fuente, 8)
+        self.fuente_info = pygame.font.Font(ruta_fuente, 10)
+        self.fuente_data = pygame.font.Font(ruta_fuente, 15)
+        self.escala_circulo = 0
+        self.circulo_creciendo = True
     def _jugador(self):
         for entity in self.game_manager.entities:
             if isinstance(entity, Jugador):
@@ -81,7 +92,44 @@ class GameScene(EscenaBase):
             return
         if eventos is None:
             eventos = pygame.event.get()
-            
+
+        if self.estado_muerto:
+            self.muerte_timer -= delta_time
+            if self.circulo_creciendo:
+                self.escala_circulo += delta_time
+
+                if self.escala_circulo >= self.game_manager.ventana.get_height() and self.jugador.lives > 0:
+                    self.circulo_creciendo = False
+
+            else:
+                self.escala_circulo -= delta_time
+                self.reiniciar_posiciones()
+                if self.escala_circulo <= 0:
+                    self.escala_circulo = 0
+                    self.circulo_creciendo = True
+                    self.muerte_timer = 0
+
+
+            if self.muerte_timer <= 0:
+                self.estado_muerto = False
+                if self.jugador.lives <= 0:
+                    self.game_manager.resetear_grilla()
+                    self.game_manager.nivel = 0
+                    self.game_manager.scenes["game"] = GameScene(self.game_manager)
+                    self.game_manager.change_scene("game_over")
+                    return
+                else:
+                    GameScene.sirena_normal.play(loops=-1)
+                    self.estado_sirena_actual = "normal"
+            return
+
+        if self.jugador.lives <= 0:
+            self.game_manager.resetear_grilla()
+            self.game_manager.nivel = 0
+            self.game_manager.scenes["game"] = GameScene(self.game_manager)
+            self.game_manager.change_scene("game_over")
+            return
+        
         hay_ojos_activos = False 
         for entidad in self.game_manager.entities:
             if isinstance(entidad, Enemigo) and entidad.state == "muerto":
@@ -129,33 +177,101 @@ class GameScene(EscenaBase):
 
                 for entidad in self.game_manager.entities:
                     if isinstance(entidad, Enemigo) and (entidad.state == "asustado" or entidad.state == "asustado_parpadeando"):
-                        entidad.state = "scatter"  
+                        entidad.state = "scatter"
                         entidad.velocidad = c.VELOCIDAD_BASE*0.75
 
         self._verificar_salida_fantasmas()
         self.game_manager.entities.update(self.game_manager.ventana, delta_time, self, eventos=eventos)
         self.manejar_colisiones()
         
-        if self.jugador.lives <= 0:    
-            self.game_manager.resetear_grilla()
-            self.game_manager.nivel=0
-            self.game_manager.scenes["game"] = GameScene(self.game_manager)
-            self.game_manager.change_scene("game_over")
-            return
+
         if not self.check_pellets():
             self.avanzar_nivel()
         
 
     def render(self):
-        self.game_manager.ventana.fill(c.COLOR_BG)    
+        ventana = self.game_manager.ventana
+        self.game_manager.ventana.fill(c.COLOR_BG)   
+        ancho_actual, alto_actual = self.game_manager.ventana.get_size()
+        hud_alto = alto_actual * 0.08  # 8% del alto
+        hud_rect = pygame.Rect(0, 0, ancho_actual, hud_alto)
 
+        OFFSET_Y = hud_alto
         for entity in self.game_manager.entities:
+            y_original = entity.rect.y
+            entity.rect.y += OFFSET_Y
+
             entity.draw(self.game_manager.ventana)
-        
+            entity.rect.y = y_original
         for texto in self.textos_puntajes:
-            superficie_texto = self.fuente_puntajes.render(texto[0], True, (0, 255, 255))
-            rect_texto = superficie_texto.get_rect(center=(texto[1], texto[2]))
-            self.game_manager.ventana.blit(superficie_texto, rect_texto)
+            dibujar_texto(
+                texto=texto[0],
+                ventana=self.game_manager.ventana,
+                fuente=self.fuente_puntajes,
+                color=(0, 255, 255),
+                x=texto[1],
+                y=texto[2],
+                centrado=True
+            )
+
+        if self.estado_muerto:
+            x_jugador = self.jugador.rect.centerx
+            y_jugador = self.jugador.rect.centery
+
+            pygame.draw.circle(ventana, c.COLOR_BG, (x_jugador, y_jugador), self.escala_circulo)
+
+
+        pygame.draw.rect(self.game_manager.ventana, (10, 10, 30), hud_rect)
+        pygame.draw.line(self.game_manager.ventana, (255, 255, 100), (0, hud_alto), (ancho_actual, hud_alto), 2)
+        y_info = hud_alto * 1//3 
+        y_data = hud_alto * 2//3 
+
+        x_score = ancho_actual * 0.15
+
+        
+
+        dibujar_texto(f"Score:",self.game_manager.ventana,self.fuente_info, c.NARANJA, x_score ,y_info, True)
+        dibujar_texto(
+            f"{self.game_manager.score:06d}", 
+            ventana, 
+            self.fuente_data,
+            (255, 215, 0), 
+            x_score,
+            y_data, 
+            True
+        )
+
+        x_high_score = ancho_actual * 0.5
+
+    
+        dibujar_texto(f"High Score:",self.game_manager.ventana,self.fuente_info, c.ROJO, x_high_score ,y_info, True)
+        dibujar_texto(
+            f"{self.game_manager.score:06d}", 
+            ventana, 
+            self.fuente_data,
+            c.ROJO, 
+            x_high_score,
+            y_data, 
+            True)
+
+
+        x_nivel = ancho_actual * 0.85
+
+        dibujar_texto(f"Nivel:",self.game_manager.ventana,self.fuente_info, c.ROSA, x_nivel, y_info, True)
+        dibujar_texto(f"{self.game_manager.nivel}",self.game_manager.ventana,self.fuente_info, c.AMARILLO, x_nivel,y_data, True)
+
+
+        y_footer = alto_actual * 15.5 // 16
+        x_vidas = ancho_actual * 0.5
+        x_espaciado = ancho_actual * 0.06
+
+        for i in range(self.jugador.lives):
+            x = x_vidas + (i-1) * x_espaciado
+            ventana.blit(self.imagen_vida, (x, y_footer))
+
+
+
+        
 
     def manejar_colisiones(self):
         jugador = self.jugador
@@ -187,8 +303,6 @@ class GameScene(EscenaBase):
                             if entidad.state != "muerto" and not entidad.esta_en_casa:
                                 entidad.state = "asustado"
                                 entidad.velocidad = c.VELOCIDAD_BASE * 0.5
-                                entidad.direction = (entidad.direction[0] * -1, entidad.direction[1] * -1) 
-                                entidad.proxima_direccion = entidad.direction
 
                                 centro_x, centro_y = entidad.rect.centerx, entidad.rect.centery
                                 centro_gxy = self.game_manager.grid_manager.world_to_grid((centro_x, centro_y))
@@ -211,6 +325,8 @@ class GameScene(EscenaBase):
                                 centro_celda = self.game_manager.grid_manager.grid_to_world(centro_gxy)
                                 entidad.rect.center = centro_celda
 
+
+
             elif isinstance(entidad_colisionada, Enemigo):
                 estados_susto=["asustado", "asustado_parpadeando"]
                 estados=["asustado", "asustado_parpadeando","muerto", "explotando"]
@@ -231,14 +347,8 @@ class GameScene(EscenaBase):
                         1000
                     ])
                 elif entidad_colisionada.state not in estados:
-                    GameScene.muerte.play()
-                    GameScene.sirena_normal.stop()
-                    GameScene.sirena_power.stop()
-                    GameScene.sirena_ojos.stop()
-                    jugador.lives -= 1
-                    self._reiniciar_tras_muerte()
+                    self.perder_vida()
                     
-
     def check_pellets(self):
         for entidad in self.game_manager.entities:
             if isinstance(entidad, Tile):
@@ -260,6 +370,47 @@ class GameScene(EscenaBase):
         self.game_manager.rutina_manager.reiniciar()
         self.game_manager.scenes['intermision'] = Intermision(self.game_manager)
         self.game_manager.change_scene("intermision")
+
+    def perder_vida(self):
+        if self.estado_muerto:
+            return
+        
+        self.circulo_creciendo = True
+        GameScene.muerte.play()
+        self.jugador.lives -= 1
+        
+
+        
+
+        GameScene.sirena_normal.stop()
+        GameScene.sirena_power.stop()
+        GameScene.sirena_ojos.stop()
+        
+
+        self.jugador.is_powered_up = False
+        self.power_up_timer = 0
+        self.fantasmas_comidos_racha = 0
+
+        self.escala_circulo = 0
+        self.muerte_timer = 2000
+
+        self.estado_muerto = True
+
+
+    def reiniciar_posiciones(self):
+        self.jugador.rect.centerx = self.jugador.pos_aparicion[0]
+        self.jugador.rect.centery = self.jugador.pos_aparicion[1]
+
+        enemigos = [entidad for entidad in self.game_manager.entities if isinstance(entidad, Enemigo)]
+        for i,enemigo in enumerate(enemigos):
+            enemigo.rect.centerx = enemigo.pos_aparicion[0]
+            enemigo.rect.centery = enemigo.pos_aparicion[1]
+            enemigo.velocidad = c.VELOCIDAD_BASE * 0.75 * c.MULTIPLICADOR_VELOCIDAD_ENEMIGOS[enemigo.nombre_enemigo]
+            enemigo.esta_en_casa = True
+            enemigo.state = "scatter"
+            enemigo.esta_esperando = (i >= self.indice_siguiente_salida)
+            centro_celda = self.game_manager.grid_manager.grid_to_world(enemigo.pos_inicial)
+
 
     def on_enter(self):
         self.game_manager.rutina_manager.reanudar()
@@ -287,13 +438,5 @@ class GameScene(EscenaBase):
             fantasma.esta_esperando = False   
             self.indice_siguiente_salida += 1
             
-    def _reiniciar_tras_muerte(self):
-        self.lista_fantasmas = self._get_fantasmas_ordenados()
-        
-        for i, fantasma in enumerate(self.lista_fantasmas):
-            fantasma.esta_en_casa = True
-            fantasma.state = "scatter"
-            fantasma.velocidad = c.VELOCIDAD_BASE * 0.75 * c.MULTIPLICADOR_VELOCIDAD_ENEMIGOS[fantasma.nombre_enemigo]
-            fantasma.esta_esperando = (i >= self.indice_siguiente_salida)
-            centro_celda = self.game_manager.grid_manager.grid_to_world(fantasma.pos_inicial)
-            fantasma.rect.center = centro_celda
+
+    
