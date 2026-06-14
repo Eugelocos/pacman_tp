@@ -69,7 +69,21 @@ class GameManager():
 
     def render(self):
         ancho_actual, alto_actual = self.ventana_real.get_size()
-        self.scenes.get(self.current_scene).render()
+
+        if self.pausado:
+            s = pygame.Surface((self.ventana.get_width(), self.ventana.get_height()))
+            s.set_alpha(128)
+            s.fill((0, 0, 0))
+            self.ventana.blit(s, (0, 0))
+            
+            fuente_pausa = pygame.font.Font(None, 74)
+            texto_pausa = fuente_pausa.render("PAUSA", True, (255, 255, 255))
+            rect_texto = texto_pausa.get_rect(center=(self.ventana.get_width() // 2, self.ventana.get_height() // 2))
+            self.ventana.blit(texto_pausa, rect_texto)
+
+
+        else:
+            self.scenes.get(self.current_scene).render()
 
         escala = min(ancho_actual / c.ANCHO_VENTANA, alto_actual / c.ALTO_VENTANA)
         ancho_escalado = int(c.ANCHO_VENTANA * escala)
@@ -85,13 +99,21 @@ class GameManager():
         pygame.display.flip()
     
     def update(self, delta_time=0, eventos=None):
-
-        #agregar logica de pausa, hacer update de la escena solo si no esta en pausa
-
         if eventos is None:
             eventos = pygame.event.get()
-        self.rutina_manager.update(delta_time)
-        self.scenes.get(self.current_scene).update(delta_time, eventos)
+        #agregar logica de pausa, hacer update de la escena solo si no esta en pausa
+        if self.pausado:
+            for evento in eventos:
+                if evento.type == pygame.KEYDOWN:
+                    if evento.key == pygame.K_RETURN or evento.key == pygame.K_ESCAPE:
+                        self.pausado = False
+        else:
+            for evento in eventos:
+                if evento.type == pygame.KEYDOWN:
+                    if evento.key == pygame.K_ESCAPE:
+                        self.pausado = True
+            self.rutina_manager.update(delta_time)
+            self.scenes.get(self.current_scene).update(delta_time, eventos)
 
     def resetear_grilla(self):
         self.entities.empty()
