@@ -47,6 +47,11 @@ class GameScene(EscenaBase):
         
         self.power_up_timer=0
         self.power_up_duration=6000 # 6 segs
+
+
+        self.muerte_timer = 1500
+        self.estado_muerto = False
+
         self.fantasmas_comidos_racha = 0 
         self.textos_puntajes = []
         ruta=f"pacman_tp/assets/imagenes/characters/pacman/horizontal/pacman_1.png"
@@ -55,7 +60,8 @@ class GameScene(EscenaBase):
         self.fuente_puntajes = pygame.font.Font(ruta_fuente, 8)
         self.fuente_info = pygame.font.Font(ruta_fuente, 10)
         self.fuente_data = pygame.font.Font(ruta_fuente, 15)
-        
+        self.escala_circulo = 0
+        self.circulo_creciendo = True
     def _jugador(self):
         for entity in self.game_manager.entities:
             if isinstance(entity, Jugador):
@@ -65,7 +71,44 @@ class GameScene(EscenaBase):
     def update(self, delta_time=0, eventos=None):
         if eventos is None:
             eventos = pygame.event.get()
-            
+
+        if self.estado_muerto:
+            self.muerte_timer -= delta_time
+            if self.circulo_creciendo:
+                self.escala_circulo += delta_time
+
+                if self.escala_circulo >= self.game_manager.ventana.get_height() and self.jugador.lives > 0:
+                    self.circulo_creciendo = False
+
+            else:
+                self.escala_circulo -= delta_time
+                self.reiniciar_posiciones()
+                if self.escala_circulo <= 0:
+                    self.escala_circulo = 0
+                    self.circulo_creciendo = True
+                    self.muerte_timer = 0
+
+
+            if self.muerte_timer <= 0:
+                self.estado_muerto = False
+                if self.jugador.lives <= 0:
+                    self.game_manager.resetear_grilla()
+                    self.game_manager.nivel = 0
+                    self.game_manager.scenes["game"] = GameScene(self.game_manager)
+                    self.game_manager.change_scene("game_over")
+                    return
+                else:
+                    GameScene.sirena_normal.play(loops=-1)
+                    self.estado_sirena_actual = "normal"
+            return
+
+        if self.jugador.lives <= 0:
+            self.game_manager.resetear_grilla()
+            self.game_manager.nivel = 0
+            self.game_manager.scenes["game"] = GameScene(self.game_manager)
+            self.game_manager.change_scene("game_over")
+            return
+        
         hay_ojos_activos = False 
         for entidad in self.game_manager.entities:
             if isinstance(entidad, Enemigo) and entidad.state == "muerto":
@@ -120,12 +163,7 @@ class GameScene(EscenaBase):
         self.game_manager.entities.update(self.game_manager.ventana, delta_time, self, eventos=eventos)
         self.manejar_colisiones()
         
-        if self.jugador.lives <= 0:    
-            self.game_manager.resetear_grilla()
-            self.game_manager.nivel=0
-            self.game_manager.scenes["game"] = GameScene(self.game_manager)
-            self.game_manager.change_scene("game_over")
-            return
+
         if not self.check_pellets():
             self.avanzar_nivel()
         
@@ -134,10 +172,34 @@ class GameScene(EscenaBase):
         ventana = self.game_manager.ventana
         self.game_manager.ventana.fill(c.COLOR_BG)   
         ancho_actual, alto_actual = self.game_manager.ventana.get_size()
-
-            
         hud_alto = alto_actual * 0.08  # 8% del alto
         hud_rect = pygame.Rect(0, 0, ancho_actual, hud_alto)
+
+        OFFSET_Y = hud_alto
+        for entity in self.game_manager.entities:
+            y_original = entity.rect.y
+            entity.rect.y += OFFSET_Y
+
+            entity.draw(self.game_manager.ventana)
+            entity.rect.y = y_original
+        for texto in self.textos_puntajes:
+            dibujar_texto(
+                texto=texto[0],
+                ventana=self.game_manager.ventana,
+                fuente=self.fuente_puntajes,
+                color=(0, 255, 255),
+                x=texto[1],
+                y=texto[2],
+                centrado=True
+            )
+
+        if self.estado_muerto:
+            x_jugador = self.jugador.rect.centerx
+            y_jugador = self.jugador.rect.centery
+
+            pygame.draw.circle(ventana, c.COLOR_BG, (x_jugador, y_jugador), self.escala_circulo)
+
+
         pygame.draw.rect(self.game_manager.ventana, (10, 10, 30), hud_rect)
         pygame.draw.line(self.game_manager.ventana, (255, 255, 100), (0, hud_alto), (ancho_actual, hud_alto), 2)
         y_info = hud_alto * 1//3 
@@ -187,23 +249,7 @@ class GameScene(EscenaBase):
             ventana.blit(self.imagen_vida, (x, y_footer))
 
 
-        OFFSET_Y = hud_alto
-        for entity in self.game_manager.entities:
-            y_original = entity.rect.y
-            entity.rect.y += OFFSET_Y
 
-            entity.draw(self.game_manager.ventana)
-            entity.rect.y = y_original
-        for texto in self.textos_puntajes:
-            dibujar_texto(
-                texto=texto[0],
-                ventana=self.game_manager.ventana,
-                fuente=self.fuente_puntajes,
-                color=(0, 255, 255),
-                x=texto[1],
-                y=texto[2],
-                centrado=True
-            )
         
 
     def manejar_colisiones(self):
@@ -256,6 +302,8 @@ class GameScene(EscenaBase):
                                 centro_celda = self.game_manager.grid_manager.grid_to_world(centro_gxy)
                                 entidad.rect.center = centro_celda
 
+
+
             elif isinstance(entidad_colisionada, Enemigo):
                 estados_susto=["asustado", "asustado_parpadeando"]
                 estados=["asustado", "asustado_parpadeando","muerto", "explotando"]
@@ -276,11 +324,7 @@ class GameScene(EscenaBase):
                         1000
                     ])
                 elif entidad_colisionada.state not in estados:
-                    GameScene.muerte.play()
-                    GameScene.sirena_normal.stop()
-                    GameScene.sirena_power.stop()
-                    GameScene.sirena_ojos.stop()
-                    jugador.lives -= 1
+                    self.perder_vida()
                     
     def check_pellets(self):
         for entidad in self.game_manager.entities:
@@ -300,6 +344,43 @@ class GameScene(EscenaBase):
         self.game_manager.rutina_manager.reiniciar()
         self.game_manager.scenes['intermision'] = Intermision(self.game_manager)
         self.game_manager.change_scene("intermision")
+
+    def perder_vida(self):
+        if self.estado_muerto:
+            return
+        
+        self.circulo_creciendo = True
+        GameScene.muerte.play()
+        self.jugador.lives -= 1
+        
+
+        
+
+        GameScene.sirena_normal.stop()
+        GameScene.sirena_power.stop()
+        GameScene.sirena_ojos.stop()
+        
+
+        self.jugador.is_powered_up = False
+        self.power_up_timer = 0
+        self.fantasmas_comidos_racha = 0
+
+        self.escala_circulo = 0
+        self.muerte_timer = 2000
+
+        self.estado_muerto = True
+
+
+    def reiniciar_posiciones(self):
+        self.jugador.rect.centerx = self.jugador.pos_aparicion[0]
+        self.jugador.rect.centery = self.jugador.pos_aparicion[1]
+
+        enemigos = [entidad for entidad in self.game_manager.entities if isinstance(entidad, Enemigo)]
+        for enemigo in enemigos:
+            enemigo.rect.centerx = enemigo.pos_aparicion[0]
+            enemigo.rect.centery = enemigo.pos_aparicion[1]
+            enemigo.velocidad = c.VELOCIDAD_BASE * 0.75 * c.MULTIPLICADOR_VELOCIDAD_ENEMIGOS[enemigo.nombre_enemigo]
+            enemigo.esta_en_casa = True
 
     def on_enter(self):
         self.game_manager.rutina_manager.reanudar()
