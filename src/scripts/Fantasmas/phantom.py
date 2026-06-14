@@ -54,30 +54,26 @@ def decidir_target(jugador, fantasma, escena: object):
     elif fantasma.esta_en_casa:
         target = (13, 11)
     elif fantasma.nombre_enemigo=="fantasma_violeta":
-                # 1. Chequeamos si todavía no eligió a dónde ir a explotar
                 if not hasattr(fantasma, 'destino_kamikaze'):
-                    # Traemos la lista directamente del game_manager que acabamos de arreglar
-                    celdas_validas = escena.game_manager.celdas_pasillo
-                    
-                    # Filtramos las celdas que caen adentro de la casa de los fantasmas para que no explote ahí
+                    celldas_validas = escena.game_manager.celdas_pasillo
                     celdas_seguras = []
-                    for celda in celdas_validas:
+                    for celda in celldas_validas:
                         if not (12 <= celda[1] <= 16 and 10 <= celda[0] <= 17):
                             celdas_seguras.append(celda)
                     
-                    # Elegimos una celda al azar
                     if celdas_seguras:
                         fantasma.destino_kamikaze = random.choice(celdas_seguras)
                     else:
-                        fantasma.destino_kamikaze = celda_jugador # Plan B por si algo falla
+                        fantasma.destino_kamikaze = celda_jugador 
 
-                # 2. Le asignamos el target definitivo
                 target = fantasma.destino_kamikaze
     else:
+
         if fantasma.state == "scatter":
             if fantasma.nombre_enemigo == "fantasma_verde":
                 target = celda_jugador
-            target = fantasma.pos_inicial
+            else:
+                target = fantasma.pos_inicial
         elif fantasma.state =="chase":
             if fantasma.nombre_enemigo == "fantasma_rojo":
                 target = celda_jugador
@@ -134,7 +130,6 @@ def decidir_target(jugador, fantasma, escena: object):
             elif fantasma.nombre_enemigo=="fantasma_violeta":
                         if not hasattr(fantasma, 'destino_kamikaze'):
                             celdas_validas = escena.game_manager.celdas_pasillo
-                            
                             celdas_seguras = []
                             for celda in celdas_validas:
                                 if not (12 <= celda[1] <= 16 and 10 <= celda[0] <= 17):
@@ -146,8 +141,8 @@ def decidir_target(jugador, fantasma, escena: object):
                                 fantasma.destino_kamikaze = celda_jugador
 
                         target = fantasma.destino_kamikaze
-            else:
-                target = (4,11) # un target por defecto, no deberia pasar nunca que llegue aca
+        else:
+            target = (4,11) 
     return target
 
 def decidir_direccion(fantasma, target, escena):
