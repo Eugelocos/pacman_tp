@@ -29,7 +29,7 @@ def manejar_movimiento(entidad, escena, delta_time=1):
 
 
     
-    es_pared_siguiente_dir=es_pared_en_celda(centro_gxy, entidad.proxima_direccion, escena)
+    es_pared_siguiente_dir=es_pared_en_celda(centro_gxy, entidad.proxima_direccion, escena,entidad)
     if not es_pared_siguiente_dir:
         alineado=False
         if entidad.proxima_direccion[0]!=0:
@@ -62,7 +62,7 @@ def manejar_movimiento(entidad, escena, delta_time=1):
         entidad.rect.center = pos_destino
         return
 
-    es_pared = es_pared_en_celda(centro_gxy, direccion_aplicar, escena)
+    es_pared = es_pared_en_celda(centro_gxy, direccion_aplicar, escena,entidad)
     if es_pared:
         alineado = False
         if direccion_aplicar[0]!=0:

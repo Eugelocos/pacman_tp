@@ -21,27 +21,45 @@ class GameScene(EscenaBase):
     sirena_power=None
     sirena_ojos=None
     waka_waka=None
+    sonido_explosion=None
+    sonido_pre_explosion=None
+    
     
     def __init__(self, game_manager):
         super().__init__(game_manager)
 
         self.jugador = self._jugador()
+        self.pellets_comidos = 0
+        self.umbrales_salida = [0, 30, 60, 90]
+        self.indice_siguiente_salida = 0
+        self.lista_fantasmas = self._get_fantasmas_ordenados()
         self.game_manager.score = 0
         if GameScene.muerte is None:
             GameScene.muerte=pygame.mixer.Sound(c.EFECTOS["vida_perdida"])  
         if GameScene.comer_fantasma is None:
             GameScene.comer_fantasma=pygame.mixer.Sound(c.EFECTOS["fantasma_comido"])  
+            GameScene.comer_fantasma.set_volume(0.5)
         if GameScene.sirena_normal is None:
             GameScene.sirena_normal = pygame.mixer.Sound(c.EFECTOS["mov_fantasmas"])
+            GameScene.sirena_normal.set_volume(1.0)
         if GameScene.sirena_power is None:
             GameScene.sirena_power = pygame.mixer.Sound(c.EFECTOS["power_pellet"])
         if GameScene.sirena_ojos is None:
             GameScene.sirena_ojos = pygame.mixer.Sound(c.EFECTOS["ojos"])
+            GameScene.sirena_ojos.set_volume(0.5)
         if GameScene.waka_waka is None:
             GameScene.waka_waka = pygame.mixer.Sound(c.EFECTOS["punto"])
+            GameScene.waka_waka.set_volume(0.1)
+        if GameScene.sonido_explosion is None: 
+            GameScene.sonido_explosion=pygame.mixer.Sound(c.EFECTOS["explosion"])
+        if GameScene.sonido_pre_explosion is None: 
+            GameScene.sonido_pre_explosion=pygame.mixer.Sound(c.EFECTOS["pre_explosion"])
         
-        self.ultimo_waka = 0
-        self.intervalo_waka = 150 
+        
+        self.canal_waka = pygame.mixer.Channel(1)
+        pygame.mixer.set_reserved(1)     
+        self.canal_waka = pygame.mixer.Channel(0)   
+        self.frames_congelados = 0
         self.estado_sirena_actual = None
         
         self.power_up_timer=0
@@ -58,6 +76,9 @@ class GameScene(EscenaBase):
                 
         
     def update(self, delta_time=0, eventos=None):
+        if self.frames_congelados > 0:
+            self.frames_congelados -= 1
+            return
         if eventos is None:
             eventos = pygame.event.get()
             
@@ -111,7 +132,7 @@ class GameScene(EscenaBase):
                         entidad.state = "scatter"  
                         entidad.velocidad = c.VELOCIDAD_BASE*0.75
 
-
+        self._verificar_salida_fantasmas()
         self.game_manager.entities.update(self.game_manager.ventana, delta_time, self, eventos=eventos)
         self.manejar_colisiones()
         
@@ -147,14 +168,16 @@ class GameScene(EscenaBase):
                 if entidad_colisionada.contains_pellet:
                     entidad_colisionada.remove_pellet()
                     self.game_manager.score += 10
-                    tiempo_actual = pygame.time.get_ticks()
-                    if tiempo_actual - self.ultimo_waka >= self.intervalo_waka:
-                        GameScene.waka_waka.play()
-                        self.ultimo_waka = tiempo_actual
+                    self.pellets_comidos += 1
+                    self.canal_waka.play(GameScene.waka_waka)  # siempre, sin get_busy
+                    self.frames_congelados = 1
+                    
                         
                 elif entidad_colisionada.contains_power_pellet:
                     entidad_colisionada.remove_power_pellet()
                     self.game_manager.score += 50
+                    self.pellets_comidos += 1
+                    self.frames_congelados=3
                     jugador.is_powered_up = True
                     jugador.velocidad=c.VELOCIDAD_BASE*0.90
                     self.power_up_timer=0
@@ -171,7 +194,7 @@ class GameScene(EscenaBase):
                                 centro_gxy = self.game_manager.grid_manager.world_to_grid((centro_x, centro_y))
                                 
                                 direccion_invertida = (-entidad.direction[0], -entidad.direction[1])
-                                if not es_pared_en_celda(centro_gxy, direccion_invertida, self):
+                                if not es_pared_en_celda(centro_gxy, direccion_invertida, self,entidad):
                                     entidad.proxima_direccion = direccion_invertida
                                     entidad.direction = direccion_invertida
                                 else:
@@ -179,7 +202,7 @@ class GameScene(EscenaBase):
                                     for nueva_dir in direcciones:
                                         if nueva_dir == entidad.direction or nueva_dir == direccion_invertida:
                                             continue
-                                        if not es_pared_en_celda(centro_gxy, nueva_dir, self):
+                                        if not es_pared_en_celda(centro_gxy, nueva_dir, self,entidad):
                                             entidad.proxima_direccion = nueva_dir
                                             entidad.direction = nueva_dir
                                             break
@@ -213,6 +236,7 @@ class GameScene(EscenaBase):
                     GameScene.sirena_power.stop()
                     GameScene.sirena_ojos.stop()
                     jugador.lives -= 1
+                    self._reiniciar_tras_muerte()
                     
 
     def check_pellets(self):
@@ -225,6 +249,9 @@ class GameScene(EscenaBase):
     def reiniciar(self):
         self.game_manager.resetear_grilla()
         self.jugador=self._jugador()
+        self.pellets_comidos = 0
+        self.indice_siguiente_salida = 0
+        self.lista_fantasmas = self._get_fantasmas_ordenados()
 
     def avanzar_nivel(self):
         self.reiniciar()
@@ -241,3 +268,32 @@ class GameScene(EscenaBase):
     def on_exit(self):
         self.game_manager.rutina_manager.pausar()
         self.game_manager.pausado = False
+        
+    def _get_fantasmas_ordenados(self):
+        fantasmas = [e for e in self.game_manager.entities if isinstance(e, Enemigo)]
+        orden_oficial = [f[0] for f in c.FANTASMAS]
+        fantasmas.sort(key=lambda x: orden_oficial.index(x.nombre_enemigo) if x.nombre_enemigo in orden_oficial else 99)
+        return fantasmas
+
+    def _verificar_salida_fantasmas(self):
+        if not self.lista_fantasmas:
+            self.lista_fantasmas = self._get_fantasmas_ordenados()
+            if not self.lista_fantasmas:
+                return 
+        while (self.indice_siguiente_salida < len(self.umbrales_salida) and 
+               self.indice_siguiente_salida < len(self.lista_fantasmas) and
+               self.pellets_comidos >= self.umbrales_salida[self.indice_siguiente_salida]):
+            fantasma = self.lista_fantasmas[self.indice_siguiente_salida]
+            fantasma.esta_esperando = False   
+            self.indice_siguiente_salida += 1
+            
+    def _reiniciar_tras_muerte(self):
+        self.lista_fantasmas = self._get_fantasmas_ordenados()
+        
+        for i, fantasma in enumerate(self.lista_fantasmas):
+            fantasma.esta_en_casa = True
+            fantasma.state = "scatter"
+            fantasma.velocidad = c.VELOCIDAD_BASE * 0.75 * c.MULTIPLICADOR_VELOCIDAD_ENEMIGOS[fantasma.nombre_enemigo]
+            fantasma.esta_esperando = (i >= self.indice_siguiente_salida)
+            centro_celda = self.game_manager.grid_manager.grid_to_world(fantasma.pos_inicial)
+            fantasma.rect.center = centro_celda
