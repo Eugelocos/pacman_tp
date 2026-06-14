@@ -22,12 +22,6 @@ class GameScene(EscenaBase):
     sirena_ojos=None
     waka_waka=None
     
-    comer_fantasma=None
-    sirena_normal=None
-    sirena_power=None
-    sirena_ojos=None
-    waka_waka=None
-    
     def __init__(self, game_manager):
         super().__init__(game_manager)
 
@@ -47,15 +41,19 @@ class GameScene(EscenaBase):
             GameScene.waka_waka = pygame.mixer.Sound(c.EFECTOS["punto"])
         
         
-        # Guardamos el estado actual del audio para saber cuándo cambiarlo
         self.estado_sirena_actual = None
+            
         
         self.power_up_timer=0
-        self.power_up_duration=6000 #6 segs
+        self.power_up_duration=6000 # 6 segs
         self.fantasmas_comidos_racha = 0 
         self.textos_puntajes = []
+        ruta=f"pacman_tp/assets/imagenes/characters/pacman/horizontal/pacman_1.png"
+        self.imagen_vida = pygame.transform.scale(pygame.image.load(ruta).convert_alpha(), (c.TAMAÑO_PARED, c.TAMAÑO_PARED))
         ruta_fuente = os.path.join("pacman_tp","assets", "fonts", "PressStart2P.ttf")
-        self.fuente_puntajes = pygame.font.Font(ruta_fuente, 8) #agregar fuente de retro
+        self.fuente_puntajes = pygame.font.Font(ruta_fuente, 8)
+        self.fuente_info = pygame.font.Font(ruta_fuente, 10)
+        self.fuente_data = pygame.font.Font(ruta_fuente, 15)
         
     def _jugador(self):
         """Busca y devuelve el jugador dentro de las entidades del juego.
@@ -119,8 +117,6 @@ class GameScene(EscenaBase):
 
                 for entidad in self.game_manager.entities:
                     if isinstance(entidad, Enemigo) and (entidad.state == "asustado" or entidad.state == "asustado_parpadeando"):
-                        entidad.state = "scatter"  #los fantasmas vuelven a su patrón de movimiento normal
-                        entidad.velocidad = c.VELOCIDAD_BASE*0.75
                         entidad.state = "scatter"
                         entidad.velocidad = c.VELOCIDAD_BASE*0.75
 
@@ -141,17 +137,80 @@ class GameScene(EscenaBase):
 
 
     def render(self):
-        self.game_manager.ventana.fill(c.COLOR_BG)    
+        ventana = self.game_manager.ventana
+        self.game_manager.ventana.fill(c.COLOR_BG)   
+        ancho_actual, alto_actual = self.game_manager.ventana.get_size()
 
-        for entity in self.game_manager.entities:
-            entity.draw(self.game_manager.ventana)
+            
+        hud_alto = alto_actual * 0.08  # 8% del alto
+        hud_rect = pygame.Rect(0, 0, ancho_actual, hud_alto)
+        pygame.draw.rect(self.game_manager.ventana, (10, 10, 30), hud_rect)
+        pygame.draw.line(self.game_manager.ventana, (255, 255, 100), (0, hud_alto), (ancho_actual, hud_alto), 2)
+        y_info = hud_alto * 1//3 
+        y_data = hud_alto * 2//3 
+
+        x_score = ancho_actual * 0.15
+
         
+
+        dibujar_texto(f"Score:",self.game_manager.ventana,self.fuente_info, c.NARANJA, x_score ,y_info, True)
+        dibujar_texto(
+            f"{self.game_manager.score:06d}", 
+            ventana, 
+            self.fuente_data,
+            (255, 215, 0), 
+            x_score,
+            y_data, 
+            True
+        )
+
+        x_high_score = ancho_actual * 0.5
+
+    
+        dibujar_texto(f"High Score:",self.game_manager.ventana,self.fuente_info, c.ROJO, x_high_score ,y_info, True)
+        dibujar_texto(
+            f"{self.game_manager.score:06d}", 
+            ventana, 
+            self.fuente_data,
+            c.ROJO, 
+            x_high_score,
+            y_data, 
+            True)
+
+
+        x_nivel = ancho_actual * 0.85
+
+        dibujar_texto(f"Nivel:",self.game_manager.ventana,self.fuente_info, c.ROSA, x_nivel, y_info, True)
+        dibujar_texto(f"{self.game_manager.nivel}",self.game_manager.ventana,self.fuente_info, c.AMARILLO, x_nivel,y_data, True)
+
+
+        y_footer = alto_actual * 15.5 // 16
+        x_vidas = ancho_actual * 0.5
+        x_espaciado = ancho_actual * 0.06
+
+        for i in range(self.jugador.lives):
+            x = x_vidas + (i-1) * x_espaciado
+            ventana.blit(self.imagen_vida, (x, y_footer))
+
+
+        OFFSET_Y = hud_alto
+        for entity in self.game_manager.entities:
+            y_original = entity.rect.y
+            entity.rect.y += OFFSET_Y
+
+            entity.draw(self.game_manager.ventana)
+            entity.rect.y = y_original
         for texto in self.textos_puntajes:
-            # Renderizamos el texto (0, 255, 255) es un cyan/celeste brillante
-            superficie_texto = self.fuente_puntajes.render(texto[0], True, (0, 255, 255))
-            # Lo centramos en las coordenadas guardadas
-            rect_texto = superficie_texto.get_rect(center=(texto[1], texto[2]))
-            self.game_manager.ventana.blit(superficie_texto, rect_texto)
+            dibujar_texto(
+                texto=texto[0],
+                ventana=self.game_manager.ventana,
+                fuente=self.fuente_puntajes,
+                color=(0, 255, 255),
+                x=texto[1],
+                y=texto[2],
+                centrado=True
+            )
+        
 
         pass
 
@@ -180,8 +239,6 @@ class GameScene(EscenaBase):
 
                                 entidad.state = "asustado"
                                 entidad.velocidad = c.VELOCIDAD_BASE * 0.5
-                                entidad.direction = (entidad.direction[0] * -1, entidad.direction[1] * -1) #invertir direccion
-                                entidad.proxima_direccion = entidad.direction
 
                                 centro_x, centro_y = entidad.rect.centerx, entidad.rect.centery
                                 centro_gxy = self.game_manager.grid_manager.world_to_grid((centro_x, centro_y))
@@ -232,7 +289,6 @@ class GameScene(EscenaBase):
                     GameScene.sirena_ojos.stop()
                     jugador.lives -= 1
                     
-
     def check_pellets(self):
         for entidad in self.game_manager.entities:
             if isinstance(entidad, Tile):
@@ -264,4 +320,10 @@ class GameScene(EscenaBase):
     def on_exit(self):
         self.game_manager.rutina_manager.pausar()
         self.game_manager.pausado = False
+        GameScene.muerte.stop()
+        GameScene.sirena_normal.stop()
+        GameScene.sirena_power.stop()
+        GameScene.sirena_ojos.stop()
+        GameScene.waka_waka.stop()
+
     

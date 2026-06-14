@@ -110,7 +110,7 @@ def decidir_target(jugador, fantasma, escena: object):
                     target = celda_jugador[0]+4*direccion_jugador[0]-4, celda_jugador[1]+4*direccion_jugador[1]
                 else:   
                     target = celda_jugador[0]+4*direccion_jugador[0], celda_jugador[1]+4*direccion_jugador[1]
-            elif fantasma.nombre_enemigo=="fantasma_verde":
+            elif fantasma.nombre_enemigo == "fantasma_verde":
                 tiempo_actual = pygame.time.get_ticks()
                 
                 if not hasattr(fantasma, 'victima') or not hasattr(fantasma, 'tiempo_cambio_victima') or (tiempo_actual - fantasma.tiempo_cambio_victima > 8000):
@@ -131,7 +131,7 @@ def decidir_target(jugador, fantasma, escena: object):
                     target = escena.game_manager.grid_manager.world_to_grid(centro_victima)
                 else:
                     target = celda_jugador
-            elif fantasma.nombre_enemigo=="fantasma_violeta":
+            elif fantasma.nombre_enemigo == "fantasma_violeta":
                         if not hasattr(fantasma, 'destino_kamikaze'):
                             celdas_validas = escena.game_manager.celdas_pasillo
                             

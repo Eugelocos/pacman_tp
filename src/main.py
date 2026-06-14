@@ -32,4 +32,3 @@ while corriendo:
 
 # EXIT
 pygame.quit()
-
