@@ -10,10 +10,18 @@ from data_structures.character.player_data_type import Jugador
 from scripts.Movimiento.movimiento import manejar_movimiento
 from scripts.ManagerGlobal.intermision import Intermision
 from scripts.ManagerGlobal.escena import EscenaBase
+from scripts.funciones_aux import dibujar_texto
+from scripts.Utils.utilidades_colision import es_pared_en_celda
 
 
 class GameScene(EscenaBase):
     muerte=None
+    comer_fantasma=None
+    sirena_normal=None
+    sirena_power=None
+    sirena_ojos=None
+    waka_waka=None
+    
     comer_fantasma=None
     sirena_normal=None
     sirena_power=None
@@ -27,28 +35,8 @@ class GameScene(EscenaBase):
         self.game_manager.score = 0
         if GameScene.muerte is None:
             GameScene.muerte=pygame.mixer.Sound(c.EFECTOS["vida_perdida"])  
-        if GameScene.comer_fantasma is None:
-            GameScene.comer_fantasma=pygame.mixer.Sound(c.EFECTOS["fantasma_comido"])  
-        if GameScene.sirena_normal is None:
-            GameScene.sirena_normal = pygame.mixer.Sound(c.EFECTOS["mov_fantasmas"])
-        if GameScene.sirena_power is None:
-            GameScene.sirena_power = pygame.mixer.Sound(c.EFECTOS["power_pellet"])
-        if GameScene.sirena_ojos is None:
-            GameScene.sirena_ojos = pygame.mixer.Sound(c.EFECTOS["ojos"])
-        if GameScene.waka_waka is None:
-            GameScene.waka_waka = pygame.mixer.Sound(c.EFECTOS["punto"])
-        
-        
-        # Guardamos el estado actual del audio para saber cuándo cambiarlo
-        self.estado_sirena_actual = None
-            
-        
         self.power_up_timer=0
         self.power_up_duration=6000 #6 segs
-        self.fantasmas_comidos_racha = 0 
-        self.textos_puntajes = []
-        ruta_fuente = os.path.join("pacman_tp","assets", "fonts", "PressStart2P.ttf")
-        self.fuente_puntajes = pygame.font.Font(ruta_fuente, 8) #agregar fuente de retro
         
     def _jugador(self):
         """Busca y devuelve el jugador dentro de las entidades del juego.
@@ -112,8 +100,8 @@ class GameScene(EscenaBase):
 
                 for entidad in self.game_manager.entities:
                     if isinstance(entidad, Enemigo) and (entidad.state == "asustado" or entidad.state == "asustado_parpadeando"):
-                        entidad.state = "scatter"  #los fantasmas vuelven a su patrón de movimiento normal
-                        entidad.velocidad = c.VELOCIDAD_BASE*0.75  #recuperan su velocidad
+                        entidad.state = "scatter"
+                        entidad.velocidad = c.VELOCIDAD_BASE*0.75
 
 
         self.game_manager.entities.update(self.game_manager.ventana, delta_time, self, eventos=eventos)
@@ -136,12 +124,6 @@ class GameScene(EscenaBase):
 
         for entity in self.game_manager.entities:
             entity.draw(self.game_manager.ventana)
-        for texto in self.textos_puntajes:
-            # Renderizamos el texto (0, 255, 255) es un cyan/celeste brillante
-            superficie_texto = self.fuente_puntajes.render(texto[0], True, (0, 255, 255))
-            # Lo centramos en las coordenadas guardadas
-            rect_texto = superficie_texto.get_rect(center=(texto[1], texto[2]))
-            self.game_manager.ventana.blit(superficie_texto, rect_texto)
 
         pass
 
@@ -166,10 +148,35 @@ class GameScene(EscenaBase):
                     for entidad in self.game_manager.entities:
                         if isinstance(entidad,Enemigo):
                             if entidad.state != "muerto" and not entidad.esta_en_casa:
+
+
                                 entidad.state = "asustado"
-                                entidad.velocidad = c.VELOCIDAD_BASE * 0.5  # Velocidad a la mitad
-                                entidad.direction = (entidad.direction[0] * -1, entidad.direction[1] * -1) #invertir direccion
-                                entidad.proxima_direccion = entidad.direction
+                                entidad.velocidad = c.VELOCIDAD_BASE * 0.5
+
+                                centro_x, centro_y = entidad.rect.centerx, entidad.rect.centery
+                                centro_gxy = self.game_manager.grid_manager.world_to_grid((centro_x, centro_y))
+                                centro_celda_gxy = self.game_manager.grid_manager.grid_to_world(centro_gxy)
+
+                                
+                                direccion_invertida = (-entidad.direction[0], -entidad.direction[1])
+                                if not es_pared_en_celda(centro_gxy, direccion_invertida, self):
+                                    entidad.proxima_direccion = direccion_invertida
+                                    entidad.direction = direccion_invertida
+                                else:
+                                    direcciones = [(1,0), (-1,0), (0,1), (0,-1)]
+                                    for nueva_dir in direcciones:
+                                        if nueva_dir == entidad.direction or nueva_dir == direccion_invertida:
+                                            continue
+                                        if not es_pared_en_celda(centro_gxy, nueva_dir, self):
+                                            entidad.proxima_direccion = nueva_dir
+                                            entidad.direction = nueva_dir
+                                            break
+                                entidad.cambiar_sprite_por_direccion()
+
+                                centro_celda = self.game_manager.grid_manager.grid_to_world(centro_gxy)
+                                entidad.rect.center = centro_celda
+
+
             elif isinstance(entidad_colisionada, Enemigo):
                 estados_susto=["asustado", "asustado_parpadeando"]
                 estados=["asustado", "asustado_parpadeando","muerto"]

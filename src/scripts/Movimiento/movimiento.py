@@ -49,7 +49,7 @@ def manejar_movimiento(entidad, escena, delta_time=1):
             centro_gxy = grilla.world_to_grid((centro_x, centro_y))
             centro_celda_gxy = grilla.grid_to_world(centro_gxy)
 
-#verificacion de tunel
+    #verificacion de tunel
     celda_actual = (centro_gxy[0], centro_gxy[1]) 
     pos_actual = grilla.grid_to_world(celda_actual)
     celda_objeto = grilla.get_cell_by_position(pos_actual, escena.game_manager.entities)

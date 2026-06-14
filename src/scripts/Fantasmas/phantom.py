@@ -75,6 +75,8 @@ def decidir_target(jugador, fantasma, escena: object):
                 target = fantasma.destino_kamikaze
     else:
         if fantasma.state == "scatter":
+            if fantasma.nombre_enemigo == "fantasma_verde":
+                target = celda_jugador
             target = fantasma.pos_inicial
         elif fantasma.state =="chase":
             if fantasma.nombre_enemigo == "fantasma_rojo":
@@ -102,7 +104,6 @@ def decidir_target(jugador, fantasma, escena: object):
                 vector_diferencia = vector_punto_referencia - vector_fantasma_referencia
                 posicion_objetivo = vector_fantasma_referencia + 2*vector_diferencia
                 target = escena.game_manager.grid_manager.world_to_grid(posicion_objetivo)
-
             elif fantasma.nombre_enemigo == "fantasma_rosa":
                 direccion_jugador = jugador.direction
                 if direccion_jugador[1]==1:
@@ -130,9 +131,21 @@ def decidir_target(jugador, fantasma, escena: object):
                     target = escena.game_manager.grid_manager.world_to_grid(centro_victima)
                 else:
                     target = celda_jugador
-            
-                
-                
+            elif fantasma.nombre_enemigo=="fantasma_violeta":
+                        if not hasattr(fantasma, 'destino_kamikaze'):
+                            celdas_validas = escena.game_manager.celdas_pasillo
+                            
+                            celdas_seguras = []
+                            for celda in celdas_validas:
+                                if not (12 <= celda[1] <= 16 and 10 <= celda[0] <= 17):
+                                    celdas_seguras.append(celda)
+                            
+                            if celdas_seguras:
+                                fantasma.destino_kamikaze = random.choice(celdas_seguras)
+                            else:
+                                fantasma.destino_kamikaze = celda_jugador
+
+                        target = fantasma.destino_kamikaze
             else:
                 target = (4,11) # un target por defecto, no deberia pasar nunca que llegue aca
     return target
@@ -167,13 +180,11 @@ def manejar_llegada_al_target(fantasma, escena):
         fantasma.esta_en_casa=False
     elif fantasma.state=="muerto":
         fantasma.state="scatter"
-        fantasma.velocidad=c.VELOCIDAD_BASE*0.75
+        fantasma.velocidad=c.VELOCIDAD_BASE*0.75*c.MULTIPLICADOR_VELOCIDAD_ENEMIGOS[fantasma.nombre_enemigo]
         fantasma.esta_en_casa=True
     elif fantasma.nombre_enemigo == "fantasma_violeta" and fantasma.state != "explotando":
-        # Frenamos al fantasma
         fantasma.velocidad = 0
         fantasma.state = "explotando"
-        # Guardamos en qué milisegundo empezó a explotar para la Fase 3
         fantasma.tiempo_inicio_explosion = pygame.time.get_ticks()
         
 def obtener_fantasma_por_tipo(escena, tipo_buscado):

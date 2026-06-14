@@ -17,7 +17,7 @@ class Enemigo(Personaje):
     def __init__(self, position, visibility, nombre_enemigo, tile_size, direction="derecha", state='scatter', pos_inicial=(0,0), target=(0,0)):
         ruta_inicial = f"pacman_tp/assets/imagenes/characters/enemies/{nombre_enemigo}/horizontal/{nombre_enemigo}_0.png"
         super().__init__(position, visibility, direction, tile_size, ruta_inicial, False)
-        self.velocidad = c.VELOCIDAD_BASE * 0.75
+        self.velocidad = c.VELOCIDAD_BASE * 0.75 * c.MULTIPLICADOR_VELOCIDAD_ENEMIGOS[nombre_enemigo]
         self.state=state
         self.pos_inicial=pos_inicial
         self.target=target
@@ -111,7 +111,6 @@ class Enemigo(Personaje):
             
         if self.state == "explotando":
             tiempo_actual = pygame.time.get_ticks()
-            # Si pasaron 3000 milisegundos (3 segundos) desde que frenó:
             if tiempo_actual - getattr(self, "tiempo_inicio_explosion", tiempo_actual) >= 3000:
                 self.detonar(escena)
             pass
@@ -124,45 +123,35 @@ class Enemigo(Personaje):
     def detonar(self, escena):
 
         centro_explosion = (self.rect.centerx, self.rect.centery)
-        # Radio de 5 celdas exactas en formato circular
         radio_explosion = 5 * c.TAMAÑO_PARED 
 
-        # Evaluamos a TODAS las entidades en pantalla
         for entity in escena.game_manager.entities:
-            # Evitamos que el morado se evalúe a sí mismo antes de tiempo
             if entity == self:
                 continue
 
             centro_entidad = (entity.rect.centerx, entity.rect.centery)
             
-            # Calculamos la distancia euclidiana real (circular)
             distancia = math.hypot(centro_entidad[0] - centro_explosion[0], centro_entidad[1] - centro_explosion[1])
 
-            # Si la entidad está dentro del radio de la explosión...
             if distancia <= radio_explosion:
                 
-                # 1. Si es el jugador
                 if hasattr(entity, 'es_jugador') and entity.es_jugador:
                     entity.lives -= 1
-                    # Opcional: si querés que suene la muerte
                     if hasattr(escena, 'muerte') and escena.muerte:
                          escena.muerte.play()
                 
-                # 2. Si es otro fantasma (Fuego amigo)
                 elif hasattr(entity, 'nombre_enemigo'):
                     entity.state = "muerto"
-                    entity.velocidad = c.VELOCIDAD_BASE * 1.5               # Vuelve rápido a la base
-                    entity.cambiar_sprite_por_direccion()                   # Actualiza a sprite de ojos
+                    entity.velocidad = c.VELOCIDAD_BASE * 1.5               
+                    entity.cambiar_sprite_por_direccion()                   
                     if hasattr(entity, 'destino_kamikaze'):
                         del entity.destino_kamikaze
         animacion = AnimacionExplosion(centro_explosion[0], centro_explosion[1], radio_explosion)
         
-        # Agregamos la animación al grupo general de sprites para que el GameManager la dibuje y actualice
         escena.game_manager.entities.add(animacion)
-        # Finalmente, el morado "muere" tras explotar
         self.state = "muerto"
-        self.velocidad = c.VELOCIDAD_BASE * 1.5                             # Vuelve rápido a la base
-        self.cambiar_sprite_por_direccion()                                 # Actualiza a sprite de ojos
+        self.velocidad = c.VELOCIDAD_BASE * 1.5                             
+        self.cambiar_sprite_por_direccion()                                 
         if hasattr(self, 'destino_kamikaze'):
             del self.destino_kamikaze
         
