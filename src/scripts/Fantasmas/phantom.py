@@ -30,7 +30,7 @@ def decidir_movimiento(jugador, fantasma, game_manager):
             direccion_opuesta = (fantasma.direction[0] * -1, fantasma.direction[1] * -1)
             direcciones_posibles=[]
             for d in direcciones_totales:
-                if d!=direccion_opuesta and not es_pared_en_celda(celda,d,escena):
+                if d!=direccion_opuesta and not es_pared_en_celda(celda,d,escena,fantasma):
                     direcciones_posibles.append(d)
                     
             if direcciones_posibles:
@@ -149,7 +149,7 @@ def decidir_direccion(fantasma, target, escena):
     direcciones_totales=[(0,-1), (0,1), (-1,0), (1,0)]
     direccion_opuesta=(fantasma.direction[0]*-1, fantasma.direction[1]*-1)
     centro_gxy=escena.game_manager.grid_manager.world_to_grid((fantasma.rect.centerx, fantasma.rect.centery))
-    direccciones_posibles=[dir for dir in direcciones_totales if dir!=direccion_opuesta and not es_pared_en_celda(centro_gxy, dir, escena)]
+    direccciones_posibles=[dir for dir in direcciones_totales if dir!=direccion_opuesta and not es_pared_en_celda(centro_gxy, dir, escena,fantasma)]
     if not direccciones_posibles:
         return direccion_opuesta
     candidato=(direccciones_posibles[0],999999)
@@ -171,6 +171,7 @@ def decidir_direccion(fantasma, target, escena):
 
 
 def manejar_llegada_al_target(fantasma, escena):
+    tiempo=pygame.time.get_ticks()
     if fantasma.esta_en_casa:
         fantasma.esta_en_casa=False
     elif fantasma.state=="muerto":
@@ -178,9 +179,11 @@ def manejar_llegada_al_target(fantasma, escena):
         fantasma.velocidad=c.VELOCIDAD_BASE*0.75*c.MULTIPLICADOR_VELOCIDAD_ENEMIGOS[fantasma.nombre_enemigo]
         fantasma.esta_en_casa=True
     elif fantasma.nombre_enemigo == "fantasma_violeta" and fantasma.state != "explotando":
+        fantasma.state = "cargando_explosion" 
         fantasma.velocidad = 0
-        fantasma.state = "explotando"
-        fantasma.tiempo_inicio_explosion = pygame.time.get_ticks()
+        fantasma.tiempo_inicio_carga = pygame.time.get_ticks()
+        escena.sonido_pre_explosion.play()
+        
         
 def obtener_fantasma_por_tipo(escena, tipo_buscado):
     for entity in escena.game_manager.entities:

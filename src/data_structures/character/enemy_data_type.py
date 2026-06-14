@@ -24,6 +24,7 @@ class Enemigo(Personaje):
         self.nombre_enemigo=nombre_enemigo
         self.jugador_ref=None
         self.esta_en_casa=True
+        self.esta_esperando=True
         self.ultima_celda=None
         if self.nombre_enemigo not in Enemigo.sprites_cache:
             self.cargar_frames()
@@ -104,22 +105,25 @@ class Enemigo(Personaje):
         if not self.jugador_ref:
             self.jugador_ref = escena.jugador
 
-        estados_validos=["asustado", "asustado_parpadeando", "muerto","explotando"]
+        estados_validos = ["asustado", "asustado_parpadeando", "muerto", "explotando", "cargando_explosion"]
         if self.state not in estados_validos:
             self.state = escena.game_manager.rutina_manager.get_modo_actual().lower()
-            
-        if self.state == "explotando":
-            if not hasattr(self, "tiempo_inicio_explosion"):
-                self.tiempo_inicio_explosion = pygame.time.get_ticks()
-            
+
+        if self.state == "cargando_explosion":
             tiempo_actual = pygame.time.get_ticks()
-            if tiempo_actual - self.tiempo_inicio_explosion >= 3000:
+            if tiempo_actual - self.tiempo_inicio_carga >= 3000:
+                escena.sonido_pre_explosion.stop()
+                escena.sonido_explosion.play()
                 self.detonar(escena)
+
+        elif self.state != "explotando" and not self.esta_esperando:
+            self.proxima_direccion = decidir_movimiento(self.jugador_ref, self, escena.game_manager)
+
+        if self.esta_esperando:
+            self.actualizar_animacion(delta_time)   
         else:
-            self.proxima_direccion=decidir_movimiento(self.jugador_ref, self, escena.game_manager)
-
-        super().update(pantalla, delta_time, escena, eventos)
-
+            super().update(pantalla, delta_time, escena, eventos)
+        
     def detonar(self, escena):
         centro_explosion = (self.rect.centerx, self.rect.centery)
         radio_explosion = 5 * c.TAMAÑO_PARED 

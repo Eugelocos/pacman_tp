@@ -18,6 +18,10 @@ def crear_mapa(matriz, ventana, tipos_enemigos: list[tuple[str, tuple[int, int]]
             if matriz[i][j]=="X":
                 pared=Tile((j*c.TAMAÑO_PARED+ c.TAMAÑO_PARED//2,i*c.TAMAÑO_PARED+ c.TAMAÑO_PARED//2),True,"pacman_tp/assets/imagenes/items/pared.png",True, c.TAMAÑO_PARED)
                 lista_entidades.append(pared)
+            elif matriz[i][j]=="-":
+                puerta=Tile((j*c.TAMAÑO_PARED+ c.TAMAÑO_PARED//2,i*c.TAMAÑO_PARED+ c.TAMAÑO_PARED//2),True,"pacman_tp/assets/imagenes/items/puerta.png",False, c.TAMAÑO_PARED)
+                puerta.es_puerta = True
+                lista_entidades.append(puerta)
             else: 
                 celdas_pasillo.append((j, i))
                 if matriz[i][j]==".":

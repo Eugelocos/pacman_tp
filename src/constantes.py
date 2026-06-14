@@ -65,7 +65,9 @@ EFECTOS = {
     "vida_perdida" : "pacman_tp//assets//sonidos//vida_perdida.wav",
     "click" : "pacman_tp//assets//sonidos//click.mp3",
     "error" : "pacman_tp//assets//sonidos//error.mp3",
-    "jugar" : "pacman_tp//assets//sonidos//jugar.mp3"
+    "jugar" : "pacman_tp//assets//sonidos//jugar.mp3",
+    "explosion" : "pacman_tp//assets//sonidos//explosion.wav",
+    "pre_explosion":"pacman_tp//assets//sonidos//pre_explosion.wav"
 }
 
 MULTIPLICADOR_VELOCIDAD_ENEMIGOS = {
