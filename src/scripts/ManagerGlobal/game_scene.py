@@ -15,6 +15,50 @@ from scripts.Utils.utilidades_colision import es_pared_en_celda
 
 
 class GameScene(EscenaBase):
+    """Escena principal del juego. Maneja toda la logica de la partida.
+
+    Controla el jugador, los fantasmas, las colisiones, los power-ups,
+    los niveles, las vidas, los sonidos y la logica de juego en general.
+    Implementa el comportamiento clasico de PacMan con variantes propias.
+
+    Comportamientos implementados:
+        - Fantasmas con logica individual (rojo, rosa, cyan, naranja, verde, violeta)
+        - Power-ups que asustan fantasmas y dan puntaje multiplicador
+        - Rutinas scatter/chase que alternan segun el nivel
+        - Salida progresiva de fantasmas de la casa (0, 30, 60, 90 puntos comidos)
+        - Animacion de muerte con circulo expansivo
+        - Puntajes flotantes al comer fantasmas
+        - Sonidos ambientales segun el estado (normal, power, ojos)
+
+    Attributes:
+        muerte: Sonido de muerte del jugador (variable de clase).
+        comer_fantasma: Sonido al comer un fantasma (variable de clase).
+        sirena_normal: Musica base del juego (variable de clase).
+        sirena_power: Musica durante power-up (variable de clase).
+        sirena_ojos: Musica cuando los fantasmas vuelven a casa (variable de clase).
+        waka_waka: Sonido de comer puntos (variable de clase).
+        sonido_explosion: Sonido de explosion del violeta (variable de clase).
+        sonido_pre_explosion: Sonido previo a la explosion (variable de clase).
+
+        jugador: Referencia al jugador (PacMan).
+        pellets_comidos: Cantidad de puntos comidos en el nivel actual.
+        umbrales_salida: Puntos necesarios para que salga cada fantasma de la casa.
+        indice_siguiente_salida: Proximo fantasma que debe salir.
+        lista_fantasmas: Fantasmas ordenados para salida progresiva.
+        estado_sirena_actual: Sirena que esta sonando actualmente.
+
+        power_up_timer: Timer del efecto power-up.
+        power_up_duration: Duracion total del power-up (6000ms).
+        muerte_timer: Timer de la animacion de muerte.
+        estado_muerto: True si el jugador esta en animacion de muerte.
+        escala_circulo: Tamaño del circulo de muerte.
+        circulo_creciendo: True si el circulo esta creciendo, False si decrece.
+
+        textos_puntajes: Lista de textos flotantes (puntajes al comer fantasma).
+        imagen_vida: Icono de vida que se muestra en el HUD.
+        fuentes: Diferentes tamaños de fuente para el HUD.
+    """
+
     muerte=None
     comer_fantasma=None
     sirena_normal=None
@@ -26,6 +70,14 @@ class GameScene(EscenaBase):
     
     
     def __init__(self, game_manager):
+        """Inicializa la escena del juego.
+
+        Carga sonidos, fuentes, imagenes y configura el estado inicial
+        del nivel (timer, puntajes, fantasmas, etc.)
+
+        Args:
+            game_manager: Referencia al administrador principal del juego.
+        """
         super().__init__(game_manager)
 
         self.jugador = self._jugador()
@@ -80,13 +132,39 @@ class GameScene(EscenaBase):
         self.fuente_data = pygame.font.Font(ruta_fuente, 15)
         self.escala_circulo = 0
         self.circulo_creciendo = True
-    def _jugador(self):
+
+
+    def _jugador(self) -> Jugador|None:
+        """Busca y devuelve la instancia de Jugador en el grupo de entidades
+
+        Returns:
+            Jugador|None: La instancia de Jugador, o None si no se encuentra.
+        """
         for entity in self.game_manager.entities:
             if isinstance(entity, Jugador):
                 return entity
                 
         
-    def update(self, delta_time=0, eventos=None):
+    def update(self, delta_time: int|float, eventos=None):
+        """Actualiza toda la logica del juego cada frame.
+
+        Maneja en orde:
+            1. Congelacion de frames (efecto de impacto al comer)
+            2. Animacion de muerte y estado de muerte (game over)
+            3. Cambio de sirenas segun estado del juego
+            4. Actualizacion de textos flotantes
+            5. Power up y parpadeo de fantasmas
+            6. Logica de salida de fantasmas en orden dependiendo de pellets comidos
+            7. Actualizacion de logica individual de entidades
+            8. Manejo de colisiones
+            9. Verificacion de nivel superado
+
+        Args:
+            delta_time (int | float): Tiempo transcurrido desde el ultimo frame (en ms).
+            eventos (_type_, optional): Lista de eventos de pygame. Defaults to None.
+
+        """
+
         if self.frames_congelados > 0:
             self.frames_congelados -= 1
             return
@@ -195,6 +273,16 @@ class GameScene(EscenaBase):
         
 
     def render(self):
+        """Dibuja todos los elementos del juego en pantalla.
+
+        Orden de dibujo:
+            1. Fondo
+            2. Entidades
+            3. Texto puntajes
+            4. Circulo animacion muerte
+            5. HUD (score, high score, nivel, vidas)
+
+        """
         ventana = self.game_manager.ventana
         self.game_manager.ventana.fill(c.COLOR_BG)   
         ancho_actual, alto_actual = self.game_manager.ventana.get_size()
@@ -262,7 +350,7 @@ class GameScene(EscenaBase):
 
         x_nivel = ancho_actual * 0.85
 
-        dibujar_texto(f"Nivel:",self.game_manager.ventana,self.fuente_info, c.ROSA, x_nivel, y_info, True)
+        dibujar_texto(f"Level:",self.game_manager.ventana,self.fuente_info, c.ROSA, x_nivel, y_info, True)
         dibujar_texto(f"{self.game_manager.nivel}",self.game_manager.ventana,self.fuente_info, c.AMARILLO, x_nivel,y_data, True)
 
 
@@ -279,6 +367,11 @@ class GameScene(EscenaBase):
         
 
     def manejar_colisiones(self):
+        """Procesa las colisiones del Jugador con Tiles y Enemigos.
+
+        - Si es Tile y es pellet +10pts, si es power pellet +50pts con logica de power up.
+        - Si es Enemigo y el Jugador tiene power up, come al fantasma (200*2^n pts), si no pierde vida
+        """
         jugador = self.jugador
         if jugador is None:
             return
@@ -354,7 +447,12 @@ class GameScene(EscenaBase):
                 elif entidad_colisionada.state not in estados:
                     self.perder_vida()
                     
-    def check_pellets(self):
+    def check_pellets(self) -> bool:
+        """Helper que verifica si quedan pellets o power pellets en el mapa sin comer
+
+        Returns:
+            bool: True si quedan, False si no queda ninguna
+        """
         for entidad in self.game_manager.entities:
             if isinstance(entidad, Tile):
                 if entidad.contains_pellet or entidad.contains_power_pellet:
@@ -362,6 +460,8 @@ class GameScene(EscenaBase):
         return False
     
     def reiniciar(self):
+        """Reiniciar el estado del nivel (grilla, referencias, pellets, contadores).
+        """
         self.game_manager.resetear_grilla()
         self.jugador=self._jugador()
         self.pellets_comidos = 0
@@ -369,6 +469,10 @@ class GameScene(EscenaBase):
         self.lista_fantasmas = self._get_fantasmas_ordenados()
 
     def avanzar_nivel(self):
+        """Avanza al siguiente nivel
+
+        Reincia el estado, aumenta el nivel, limpia la rutinas, y cambia a la escena Intermision
+        """
         self.reiniciar()
         self.game_manager.nivel += 1
         self.game_manager.rutina_manager.rutina =self.game_manager.rutina_manager.inicializar_rutinas()
@@ -377,6 +481,11 @@ class GameScene(EscenaBase):
         self.game_manager.change_scene("intermision")
 
     def perder_vida(self):
+        """Maneja la perdida de una vida
+
+        Reproduce sonido, resta vida, detiene sirenas, resetea power ups, contadores/rachas 
+        y la animacion de muerte, establece estado muerto en True
+        """
         if self.estado_muerto:
             return
         
@@ -403,6 +512,10 @@ class GameScene(EscenaBase):
 
 
     def reiniciar_posiciones(self):
+        """Reinicia posiciones y estados de los peronajes de la escena
+
+        Reinicia posicion del jugador, y por cada enemigo reinicia su posicion y estados, y restablece su velocidad.
+        """
         self.jugador.rect.centerx = self.jugador.pos_aparicion[0]
         self.jugador.rect.centery = self.jugador.pos_aparicion[1]
 
@@ -414,24 +527,36 @@ class GameScene(EscenaBase):
             enemigo.esta_en_casa = True
             enemigo.state = "scatter"
             enemigo.esta_esperando = (i >= self.indice_siguiente_salida)
-            centro_celda = self.game_manager.grid_manager.grid_to_world(enemigo.pos_inicial)
 
 
     def on_enter(self):
+        """Se ejecuta al entrar a la escena. Reanuda rutinas y desactiva la pausa.
+        """
         self.game_manager.rutina_manager.reanudar()
         self.game_manager.pausado = False
 
     def on_exit(self):
+        """Se ejecuta al salir de la escena. Pausa rutinas y desactiva la pausa."""
         self.game_manager.rutina_manager.pausar()
         self.game_manager.pausado = False
         
-    def _get_fantasmas_ordenados(self):
+    def _get_fantasmas_ordenados(self) -> list[Enemigo]:
+        """Obtiene los fantasmas ordenados segun el orden oficial.
+
+        Returns:
+            list[Enemigo]: Lista de fantasmas ordenada por su tipo
+        """
         fantasmas = [e for e in self.game_manager.entities if isinstance(e, Enemigo)]
         orden_oficial = [f[0] for f in c.FANTASMAS]
         fantasmas.sort(key=lambda x: orden_oficial.index(x.nombre_enemigo) if x.nombre_enemigo in orden_oficial else 99)
         return fantasmas
 
     def _verificar_salida_fantasmas(self):
+        """Verifica si algun fantasma debe salir de la casa.
+
+        Compara los puntos comidos con los umbrales de salida y libera
+        a los fantasmas progresivamente.
+        """
         if not self.lista_fantasmas:
             self.lista_fantasmas = self._get_fantasmas_ordenados()
             if not self.lista_fantasmas:

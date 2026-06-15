@@ -1,11 +1,19 @@
 import pygame
 
 class Entity(pygame.sprite.Sprite):
-    """Entidad base, es la entidad de quien heredan todos los modelos de datos, posee funciones por defecto que pueden ser sobreescritas
+    """Clase base abstracta para todas las entidades del juego.
 
-    Args:
-        pygame (pygame.sprite.Sprite): Padre de Entity para poder agrupar las entidades en grupos y utilizar metodos nativos de pygame
+    Hereda de pygame.sprite.Sprite para poder agrupar entidades en grupos
+    y usar metodos nativos de pygame como colisiones y actualizacion en masa.
+    Toda entidad (jugador, fantasmas, tiles) hereda de esta clase.
+
+    Attributes:
+        visibility (bool): True si la entidad debe ser visible, False si no.
+        image (pygame.Surface | None): Imagen de la entidad escalada al tile_size.
+        rect (pygame.Rect): Rectangulo de posicion y tamaño (centro para ubicacion).
+        tile_size (int | float): Tamano de celda para escalado de imagenes.
     """
+
     def __init__(self, position: tuple, visibility: bool, tile_size: int|float, sprite=None):
         """Inicializacion de la entidad
 

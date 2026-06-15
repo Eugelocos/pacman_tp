@@ -7,10 +7,22 @@ from scripts.Movimiento.movimiento import manejar_movimiento
 import constantes as c
 
 class Personaje(Entity):
-    """Clase hija de Entity, maneja logica especifica de entidades con movimiento dinamico
+    """Clase base para personajes con movimiento dinamico (jugador y enemigos).
 
-    Args:
-        Entity (Entity): Entidad base, es la entidad de quien heredan todos los modelos de datos, posee funciones por defecto que pueden ser sobreescritas
+    Hereda de Entity y agrega funcionalidad de movimiento, animacion por frames,
+    buffer de direccion y velocidad. Sirve como clase padre para Jugador y Enemigo.
+
+    Attributes:
+        DIRECTIONS (dict): Mapeo de nombres de direccion a tuplas (dx, dy).
+        velocidad (float): Velocidad actual del personaje en pixeles por segundo.
+        direction (tuple): Direccion actual (dx, dy).
+        proxima_direccion (tuple): Direccion solicitada (buffer para cambios).
+        frames (list): Lista de imagenes para la animacion.
+        frame_actual (int): Indice del frame actual.
+        frame_timer (float): Acumulador de tiempo para animacion.
+        frame_delay (int): Tiempo entre cambios de frame (ms).
+        es_jugador (bool): True si es el jugador, False si es enemigo.
+        pos_aparicion (tuple): Posicion inicial en pixeles (x, y).
     """
     DIRECTIONS={"arriba":(0,-1),"abajo":(0,1),"derecha":(1, 0),"izquierda":(-1,0), "idle":(0,0)}
     def __init__(self,position: tuple, visibility: bool, direction: str, tile_size: int|float, sprite: str, es_jugador: bool):
