@@ -86,6 +86,7 @@ class GameScene(EscenaBase):
         self.indice_siguiente_salida = 0
         self.lista_fantasmas = self._get_fantasmas_ordenados()
         self.game_manager.score = 0
+        self.sumar_vida=False
         if GameScene.muerte is None:
             GameScene.muerte=pygame.mixer.Sound(c.EFECTOS["vida_perdida"])  
         if GameScene.comer_fantasma is None:
@@ -146,9 +147,13 @@ class GameScene(EscenaBase):
                 
         
     def update(self, delta_time: int|float, eventos=None):
+        
+  
+            
         """Actualiza toda la logica del juego cada frame.
 
         Maneja en orde:
+            0. Manejo de vida extra
             1. Congelacion de frames (efecto de impacto al comer)
             2. Animacion de muerte y estado de muerte (game over)
             3. Cambio de sirenas segun estado del juego
@@ -165,8 +170,12 @@ class GameScene(EscenaBase):
 
         """
 
-        if self.frames_congelados > 0:
-            self.frames_congelados -= 1
+        if self.game_manager.score>10000 and self.jugador.lives<4 and (not self.sumar_vida):
+            self.jugador.lives+=1
+            self.sumar_vida=True
+
+        if self.frames_congelados>0:
+            self.frames_congelados-=1
             return
         if eventos is None:
             eventos = pygame.event.get()
@@ -196,6 +205,8 @@ class GameScene(EscenaBase):
             if self.muerte_timer <= 0:
                 self.estado_muerto = False
                 if self.jugador.lives <= 0:
+                    with open("pacman_tp//assets//high_score","w") as nuevo:
+                        nuevo.write(str(self.game_manager.high_score))
                     self.game_manager.resetear_grilla()
                     self.game_manager.nivel = 1
                     self.game_manager.scenes["game"] = GameScene(self.game_manager)
@@ -271,6 +282,7 @@ class GameScene(EscenaBase):
         if not self.check_pellets():
             self.avanzar_nivel()
         
+        
 
     def render(self):
         """Dibuja todos los elementos del juego en pantalla.
@@ -339,7 +351,7 @@ class GameScene(EscenaBase):
     
         dibujar_texto(f"High Score:",self.game_manager.ventana,self.fuente_info, c.ROJO, x_high_score ,y_info, True)
         dibujar_texto(
-            f"{self.game_manager.score:06d}", 
+            f"{self.game_manager.high_score:06d}", 
             ventana, 
             self.fuente_data,
             c.ROJO, 
@@ -384,7 +396,7 @@ class GameScene(EscenaBase):
                     self.game_manager.score += 10
                     self.pellets_comidos += 1
                     self.canal_waka.play(GameScene.waka_waka)  # siempre, sin get_busy
-                    self.frames_congelados = 1
+                    
                     
                         
                 elif entidad_colisionada.contains_power_pellet:
@@ -423,8 +435,7 @@ class GameScene(EscenaBase):
                                 centro_celda = self.game_manager.grid_manager.grid_to_world(centro_gxy)
                                 entidad.rect.center = centro_celda
 
-
-
+                
             elif isinstance(entidad_colisionada, Enemigo):
                 estados_susto=["asustado", "asustado_parpadeando"]
                 estados=["asustado", "asustado_parpadeando","muerto", "explotando"]
@@ -446,7 +457,12 @@ class GameScene(EscenaBase):
                     ])
                 elif entidad_colisionada.state not in estados:
                     self.perder_vida()
-                    
+    
+
+            if self.game_manager.score>self.game_manager.high_score:
+                        self.game_manager.high_score=self.game_manager.score
+            
+       
     def check_pellets(self) -> bool:
         """Helper que verifica si quedan pellets o power pellets en el mapa sin comer
 
@@ -547,8 +563,8 @@ class GameScene(EscenaBase):
             list[Enemigo]: Lista de fantasmas ordenada por su tipo
         """
         fantasmas = [e for e in self.game_manager.entities if isinstance(e, Enemigo)]
-        orden_oficial = [f[0] for f in c.FANTASMAS]
-        fantasmas.sort(key=lambda x: orden_oficial.index(x.nombre_enemigo) if x.nombre_enemigo in orden_oficial else 99)
+        orden_usuario = [e[0] for e in self.game_manager.tipos_enemigos]
+        fantasmas.sort(key=lambda x: orden_usuario.index(x.nombre_enemigo) if x.nombre_enemigo in orden_usuario else 99)
         return fantasmas
 
     def _verificar_salida_fantasmas(self):

@@ -56,8 +56,8 @@ class GameManager():
             (c.ANCHO_VENTANA, c.ALTO_VENTANA), 
             pygame.RESIZABLE
         )
-        
-        self.high_score=0 #luego hay que implementar la logica de lectura de archivo donde esta el high score real
+        with open("pacman_tp//assets//high_score") as archivo:
+            self.high_score=int(archivo.readline())
         self.score=0 
         self.nivel=0
         self.tipos_enemigos=[] # [("fantasma_... ,  (esquina)"), ... ]

@@ -7,9 +7,11 @@ import constantes as c
 from scripts.ManagerGlobal.game_manager import GameManager
 
 pygame.mixer.pre_init(44100, -16, 2, 512)
-pygame.init()
 
-# controlar FPS (framerate)
+pygame.init()
+pygame.display.set_caption("PAC-MAN")
+icono = pygame.image.load("pacman_tp//assets//imagenes//logo.png")
+pygame.display.set_icon(icono)
 reloj=pygame.time.Clock()
 
 game_manager = GameManager()

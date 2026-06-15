@@ -226,11 +226,9 @@ class Enemigo(Personaje):
 
             if distancia <= radio_explosion:
                 if entity == escena.jugador:
-                    escena.muerte.play()
-                    escena.sirena_normal.stop()
-                    escena.sirena_power.stop()
-                    escena.sirena_ojos.stop()
-                    entity.lives -= 1 
+                    if not escena.estado_muerto:
+                        escena.perder_vida()
+                    
                 elif hasattr(entity, 'nombre_enemigo'):
                     entity.state = "muerto"
                     entity.velocidad = c.VELOCIDAD_BASE * 1.5               
