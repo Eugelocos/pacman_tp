@@ -38,8 +38,8 @@ class WelcomeScene(EscenaBase):
     def update(self,delta_time=0, eventos=None):
         """Maneja los inputs y el temporizador del parpadeo."""
         for event in eventos:
-            if event.type==pygame.KEYDOWN:
-                if event.key==pygame.K_RETURN:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
                     WelcomeScene.click.play()
                     # Pasamos a la siguiente pantalla
                     self.game_manager.change_scene("select_fantasmas")
@@ -80,10 +80,12 @@ class WelcomeScene(EscenaBase):
             y = alto_actual * 11 // 16            
             dibujar_texto("Presiona ENTER para jugar",self.game_manager.ventana,self.fuente_normal, c.BLANCO, x,y, True)
 
+        
     def on_enter(self):
         """Se ejecuta al entrar a esta escena. Resetea el parpadeo."""
         self.tiempo = 0
         self.texto = True
+        self.game_manager.pausado = False
 
 
 class SelectFantasmas(EscenaBase):

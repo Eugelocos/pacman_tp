@@ -119,6 +119,9 @@ class GameScene(EscenaBase):
         self.power_up_timer=0
         self.power_up_duration=6000 # 6 segs
 
+        self.cortina_timer = 1500
+        self.cortina_rect = pygame.Rect(0, 0, self.game_manager.ventana.get_width(), self.game_manager.ventana.get_height())
+        self.is_cortina = True
 
         self.muerte_timer = 1500
         self.estado_muerto = False
@@ -170,6 +173,20 @@ class GameScene(EscenaBase):
 
         """
 
+        if self.is_cortina:
+            self.cortina_timer -= delta_time
+            if self.cortina_timer <= 0:
+                self.is_cortina = False
+
+            progreso = 1 - (self.cortina_timer / 1500)
+            salto_actual = int(progreso * 36)
+
+            altura_maxima = self.game_manager.ventana.get_height()
+            self.altura_actual = altura_maxima - (salto_actual * (altura_maxima / 36))
+
+            self.cortina_rect.height = int(self.altura_actual)
+            return
+        
         if self.game_manager.score>10000 and self.jugador.lives<4 and (not self.sumar_vida):
             self.jugador.lives+=1
             self.sumar_vida=True
@@ -295,6 +312,7 @@ class GameScene(EscenaBase):
             5. HUD (score, high score, nivel, vidas)
 
         """
+
         ventana = self.game_manager.ventana
         self.game_manager.ventana.fill(c.COLOR_BG)   
         ancho_actual, alto_actual = self.game_manager.ventana.get_size()
@@ -374,9 +392,8 @@ class GameScene(EscenaBase):
             x = x_vidas + (i-1) * x_espaciado
             ventana.blit(self.imagen_vida, (x, y_footer))
 
+        pygame.draw.rect(self.game_manager.ventana, c.COLOR_BG, self.cortina_rect)
 
-
-        
 
     def manejar_colisiones(self):
         """Procesa las colisiones del Jugador con Tiles y Enemigos.
@@ -461,8 +478,7 @@ class GameScene(EscenaBase):
 
             if self.game_manager.score>self.game_manager.high_score:
                         self.game_manager.high_score=self.game_manager.score
-            
-       
+                
     def check_pellets(self) -> bool:
         """Helper que verifica si quedan pellets o power pellets en el mapa sin comer
 
@@ -508,7 +524,7 @@ class GameScene(EscenaBase):
         self.circulo_creciendo = True
         GameScene.muerte.play()
         self.jugador.lives -= 1
-        
+        self.game_manager.vidas = self.jugador.lives
 
         
 
@@ -525,7 +541,6 @@ class GameScene(EscenaBase):
         self.muerte_timer = 2000
 
         self.estado_muerto = True
-
 
     def reiniciar_posiciones(self):
         """Reinicia posiciones y estados de los peronajes de la escena
@@ -544,18 +559,28 @@ class GameScene(EscenaBase):
             enemigo.state = "scatter"
             enemigo.esta_esperando = (i >= self.indice_siguiente_salida)
 
-
     def on_enter(self):
         """Se ejecuta al entrar a la escena. Reanuda rutinas y desactiva la pausa.
         """
         self.game_manager.rutina_manager.reanudar()
         self.game_manager.pausado = False
+        print(f"Restaurando vidas: {self.game_manager.vidas}")
+        self.jugador.lives = self.game_manager.vidas
 
     def on_exit(self):
         """Se ejecuta al salir de la escena. Pausa rutinas y desactiva la pausa."""
         self.game_manager.rutina_manager.pausar()
         self.game_manager.pausado = False
-        
+        GameScene.sirena_normal.stop()
+        GameScene.sirena_power.stop()
+        GameScene.sirena_ojos.stop()
+        self.jugador.is_powered_up = False
+        self.power_up_timer = 0
+        self.fantasmas_comidos_racha = 0
+        self.is_cortina = True
+        self.cortina_timer = 1500
+        self.cortina_rect.height = self.game_manager.ventana.get_height()
+
     def _get_fantasmas_ordenados(self) -> list[Enemigo]:
         """Obtiene los fantasmas ordenados segun el orden oficial.
 

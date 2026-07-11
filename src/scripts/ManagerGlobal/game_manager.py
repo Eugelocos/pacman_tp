@@ -12,6 +12,9 @@ from Mapa.map import matriz_mapa
 from Mapa.grid_manager import GridManager
 from scripts.ManagerGlobal.rutina_manager import RutinaManager
 from scripts.ManagerGlobal.intermision import Intermision
+from scripts.funciones_aux import dibujar_texto
+
+ruta_fuente = os.path.join("pacman_tp","assets", "fonts", "PressStart2P.ttf")
 
 class GameManager():
     """Administrador principal del juego. Gestiona la ventana, las escenas, los recursos y el bucle principal.
@@ -59,6 +62,7 @@ class GameManager():
         with open("pacman_tp//assets//high_score") as archivo:
             self.high_score=int(archivo.readline())
         self.score=0 
+        self.vidas = 3
         self.nivel=0
         self.tipos_enemigos=[] # [("fantasma_... ,  (esquina)"), ... ]
         self.grid_manager = GridManager(matriz_mapa)
@@ -66,6 +70,11 @@ class GameManager():
         entidades_creadas, self.celdas_pasillo = self.grid_manager.grid
         for entity in entidades_creadas:
             self.add_entity(entity)
+        
+        
+        self.fuente_titulo = pygame.font.Font(ruta_fuente, 48)
+        self.fuente_normal = pygame.font.Font(ruta_fuente, 15)    
+
 
         self.scenes = {
             "welcome": WelcomeScene(self),
@@ -132,11 +141,8 @@ class GameManager():
             s.set_alpha(128)
             s.fill((0, 0, 0))
             self.ventana.blit(s, (0, 0))
-            
-            fuente_pausa = pygame.font.Font(None, 74)
-            texto_pausa = fuente_pausa.render("PAUSA", True, (255, 255, 255))
-            rect_texto = texto_pausa.get_rect(center=(self.ventana.get_width() // 2, self.ventana.get_height() // 2))
-            self.ventana.blit(texto_pausa, rect_texto)
+            dibujar_texto("PAUSA", self.ventana,self.fuente_titulo, c.BLANCO, self.ventana.get_width() // 2, self.ventana.get_height() // 2, centrado=True)
+            dibujar_texto("Presione ESC para reanudar", self.ventana,self.fuente_normal, c.BLANCO, self.ventana.get_width() // 2, self.ventana.get_height() // 2 + 50, centrado=True)
 
 
         else:
